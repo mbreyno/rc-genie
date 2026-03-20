@@ -167,7 +167,7 @@ export default function ReportView() {
       </div>
 
       {/* Report preview */}
-      <div className="py-8 overflow-x-auto">
+      <div className="py-8 overflow-x-auto flex justify-center">
         <div style={{ minWidth: '856px' }} ref={reportRef}>
           <ReportDocument
             report={report}
