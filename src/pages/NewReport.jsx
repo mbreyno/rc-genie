@@ -30,6 +30,8 @@ const INITIAL_STATE = {
   stateName:   '',
   stateFips:   '',
   county:      '',
+  // Step 1 (continued)
+  reportYear:      new Date().getFullYear(),
   // Step 3
   industryId:    '',
   industryLabel: '',
@@ -74,6 +76,7 @@ export default function NewReport() {
         clientFirstName:     report.client_first_name,
         clientLastName:      report.client_last_name,
         companyName:         report.company_name,
+        reportYear:          report.report_year ?? new Date().getFullYear(),
         hoursWorked:         report.hours_worked,
         stateName:           report.state_name,
         stateFips:           report.state_fips,
@@ -114,7 +117,7 @@ export default function NewReport() {
         category_allocations: data.categoryAllocations,
         tasks,
         total_compensation:   totalCompensation,
-        report_year:          new Date().getFullYear(),
+        report_year:          data.reportYear,
       }
 
       let savedId = id

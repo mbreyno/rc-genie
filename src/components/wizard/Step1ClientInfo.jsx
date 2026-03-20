@@ -1,3 +1,5 @@
+const YEAR_OPTIONS = Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i)
+
 export default function Step1ClientInfo({ data, updateData, next }) {
   const valid = data.clientFirstName.trim() && data.clientLastName.trim() && data.companyName.trim()
 
@@ -34,6 +36,18 @@ export default function Step1ClientInfo({ data, updateData, next }) {
             value={data.companyName}
             onChange={e => updateData({ companyName: e.target.value })}
           />
+        </div>
+        <div>
+          <label className="form-label">Report year *</label>
+          <select
+            className="form-input"
+            value={data.reportYear}
+            onChange={e => updateData({ reportYear: parseInt(e.target.value) })}
+          >
+            {YEAR_OPTIONS.map(y => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
         </div>
       </div>
 
