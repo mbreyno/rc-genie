@@ -29,19 +29,19 @@ function Page({ children, logoUrl, firmName, advisorName, clientName, companyNam
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px', borderBottom: '1px solid #e5e7eb', paddingBottom: '20px' }}>
         {/* Logo */}
-        <div style={{ maxWidth: '200px', maxHeight: '80px' }}>
+        <div style={{ maxWidth: '140px', maxHeight: '55px' }}>
           {logoUrl ? (
-            <img src={logoUrl} alt={firmName} style={{ maxWidth: '200px', maxHeight: '80px', objectFit: 'contain' }} />
+            <img src={logoUrl} alt={firmName} style={{ maxWidth: '140px', maxHeight: '55px', objectFit: 'contain' }} />
           ) : (
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#1e3a5f' }}>{firmName}</div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1e3a5f' }}>{firmName}</div>
           )}
         </div>
         {/* Report metadata box */}
-        <div style={{ border: '1px solid #d1d5db', borderRadius: '6px', padding: '10px 14px', fontSize: '10.5px', minWidth: '240px' }}>
+        <div style={{ border: '1px solid #d1d5db', borderRadius: '6px', padding: '12px 16px', fontSize: '12px', minWidth: '280px' }}>
           <div><strong>Year:</strong> {reportYear}</div>
-          <div style={{ marginTop: '3px' }}><strong>Report:</strong> Tax Compliance for S Corp</div>
-          <div style={{ marginTop: '3px' }}><strong>Approach:</strong> Cost Approach</div>
-          <div style={{ marginTop: '3px' }}><strong>For:</strong> {clientName} of {companyName}</div>
+          <div style={{ marginTop: '4px' }}><strong>Report:</strong> Tax Compliance for S Corp</div>
+          <div style={{ marginTop: '4px' }}><strong>Approach:</strong> Cost Approach</div>
+          <div style={{ marginTop: '4px' }}><strong>For:</strong> {clientName} of {companyName}</div>
         </div>
       </div>
 
