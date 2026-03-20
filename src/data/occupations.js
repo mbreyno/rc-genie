@@ -1,0 +1,700 @@
+/**
+ * BLS Occupation data with SOC codes and fallback wage data (2024 BLS OES).
+ * Wages are hourly: { entry: 25th pct, average: median, experienced: 75th pct }
+ * SOC codes used to fetch live data from BLS API via Netlify Function.
+ */
+
+export const CATEGORIES = {
+  marketing: {
+    id: 'marketing',
+    label: 'Marketing',
+    color: '#f4a261',
+    description: 'Sales, market research, advertising, and customer-facing activities',
+  },
+  finance: {
+    id: 'finance',
+    label: 'Finance',
+    color: '#457b9d',
+    description: 'Accounting, bookkeeping, billing, payroll, and financial management',
+  },
+  hr: {
+    id: 'hr',
+    label: 'Human Resources',
+    color: '#2a9d8f',
+    description: 'Hiring, training, employee management, and HR administration',
+  },
+  management: {
+    id: 'management',
+    label: 'Management',
+    color: '#e9c46a',
+    description: 'General operations, strategic planning, and business oversight',
+  },
+  myBusiness: {
+    id: 'myBusiness',
+    label: 'My Business',
+    color: '#e76f51',
+    description: 'Duties specific to your industry and core business activities',
+  },
+};
+
+// Proficiency wage multiplier descriptions
+export const PROFICIENCY_LEVELS = [
+  { value: 'entry',       label: 'Entry',       description: 'Less than 2 years experience / below average skill', wageKey: 'entry' },
+  { value: 'average',     label: 'Average',     description: '2–5 years experience / typical proficiency',          wageKey: 'average' },
+  { value: 'experienced', label: 'Experienced', description: '5+ years experience / high proficiency',              wageKey: 'experienced' },
+];
+
+// ─── MARKETING OCCUPATIONS ─────────────────────────────────────────────────
+export const MARKETING_OCCUPATIONS = [
+  {
+    id: 'market_research_analyst',
+    title: 'Market Research Analyst',
+    soc: '13-1161',
+    description: 'Research market conditions in local, regional, or national areas. Gather data on competitors, prices, and methods of marketing and distribution.',
+    wages: { entry: 20.97, average: 33.08, experienced: 51.84 },
+  },
+  {
+    id: 'sales_representative',
+    title: 'Sales Representative',
+    soc: '41-4012',
+    description: 'Sell goods for wholesalers or manufacturers to businesses or groups of individuals. Work requires substantial knowledge of items sold.',
+    wages: { entry: 17.98, average: 32.80, experienced: 56.37 },
+  },
+  {
+    id: 'sales_rep_technical',
+    title: 'Sales Representative – Technical',
+    soc: '41-4011',
+    description: 'Sell goods where technical or scientific knowledge is required (biology, engineering, chemistry, electronics). Typically requires 2+ years of post-secondary education.',
+    wages: { entry: 29.77, average: 50.51, experienced: 82.56 },
+  },
+  {
+    id: 'marketing_manager',
+    title: 'Marketing Manager',
+    soc: '11-2021',
+    description: 'Plan, direct, or coordinate marketing policies and programs. Determine demand for products, identify potential customers, and develop pricing strategies.',
+    wages: { entry: 39.94, average: 64.32, experienced: 100.00 },
+  },
+  {
+    id: 'advertising_promotions_manager',
+    title: 'Advertising & Promotions Manager',
+    soc: '11-2011',
+    description: 'Plan, direct, or coordinate advertising policies and programs. Prepare advertising campaigns and promotional activities for products and services.',
+    wages: { entry: 37.23, average: 61.54, experienced: 98.25 },
+  },
+  {
+    id: 'public_relations_manager',
+    title: 'Public Relations Manager',
+    soc: '11-2031',
+    description: 'Plan, direct, or coordinate activities designed to create or maintain a favorable public image for employer or client.',
+    wages: { entry: 37.50, average: 62.02, experienced: 97.18 },
+  },
+  {
+    id: 'marketing_consultant',
+    title: 'Marketing Consultant',
+    soc: '13-1161',
+    description: 'Provide expert advice on marketing strategies, campaigns, and brand positioning. Research market conditions and advise on best approaches.',
+    wages: { entry: 20.97, average: 33.08, experienced: 51.84 },
+  },
+  {
+    id: 'digital_marketing_specialist',
+    title: 'Digital Marketing Specialist',
+    soc: '13-1199',
+    description: 'Plan and execute digital marketing campaigns across web, email, social media, and other digital channels.',
+    wages: { entry: 22.50, average: 38.50, experienced: 60.10 },
+  },
+  {
+    id: 'graphic_designer',
+    title: 'Graphic Designer',
+    soc: '27-1024',
+    description: 'Create visual concepts to communicate ideas that inspire, inform, and captivate consumers. Develop layouts and production design for advertisements, brochures, and reports.',
+    wages: { entry: 18.25, average: 27.38, experienced: 40.10 },
+  },
+];
+
+// ─── FINANCE OCCUPATIONS ───────────────────────────────────────────────────
+export const FINANCE_OCCUPATIONS = [
+  {
+    id: 'accountant_auditor',
+    title: 'Accountant / Auditor',
+    soc: '13-2011',
+    description: 'Examine, analyze, and interpret accounting records to prepare financial statements, give advice, or audit and evaluate statements prepared by others.',
+    wages: { entry: 27.23, average: 40.26, experienced: 59.28 },
+  },
+  {
+    id: 'bookkeeper',
+    title: 'Bookkeeper',
+    soc: '43-3031',
+    description: 'Compute, classify, and record numerical data to keep financial records complete. Perform any combination of routine calculating, posting, and verifying duties.',
+    wages: { entry: 16.32, average: 22.87, experienced: 31.25 },
+  },
+  {
+    id: 'payroll_clerk',
+    title: 'Payroll Clerk',
+    soc: '43-3051',
+    description: 'Compile and record employee time and payroll data. May compute employees\' time worked, production, and commission. May compute and post wages and deductions.',
+    wages: { entry: 18.92, average: 25.84, experienced: 35.11 },
+  },
+  {
+    id: 'billing_invoice_clerk',
+    title: 'Billing and Invoice Clerk',
+    soc: '43-3021',
+    description: 'Compile, compute, and record billing, accounting, and statistical data for billing purposes. Prepare billing invoices for services rendered or for delivery of goods.',
+    wages: { entry: 16.58, average: 23.04, experienced: 31.42 },
+  },
+  {
+    id: 'financial_analyst',
+    title: 'Financial Analyst',
+    soc: '13-2051',
+    description: 'Conduct quantitative analyses of information affecting investment programs of public or private institutions. Provide guidance on investment decisions.',
+    wages: { entry: 31.57, average: 47.76, experienced: 74.50 },
+  },
+  {
+    id: 'financial_manager',
+    title: 'Financial Manager',
+    soc: '11-3031',
+    description: 'Plan, direct, or coordinate accounting, investing, banking, insurance, and other financial activities of a branch, office, or department.',
+    wages: { entry: 46.26, average: 71.68, experienced: 114.24 },
+  },
+  {
+    id: 'tax_preparer',
+    title: 'Tax Preparer',
+    soc: '13-2082',
+    description: 'Prepare tax returns for individuals or small businesses. Verify and review completed documentation for accuracy and compliance.',
+    wages: { entry: 16.40, average: 27.27, experienced: 45.63 },
+  },
+  {
+    id: 'budget_analyst',
+    title: 'Budget Analyst',
+    soc: '13-2031',
+    description: 'Examine budget estimates for completeness, accuracy, and conformance with procedures and regulations. Analyze budgeting and accounting reports.',
+    wages: { entry: 29.58, average: 40.59, experienced: 54.58 },
+  },
+];
+
+// ─── HUMAN RESOURCES OCCUPATIONS ──────────────────────────────────────────
+export const HR_OCCUPATIONS = [
+  {
+    id: 'hr_manager',
+    title: 'Human Resources Manager',
+    soc: '11-3121',
+    description: 'Plan, direct, and coordinate the administrative functions of an organization. Oversee the recruiting, interviewing, and hiring of new staff.',
+    wages: { entry: 41.39, average: 62.98, experienced: 98.52 },
+  },
+  {
+    id: 'hr_specialist',
+    title: 'Human Resources Specialist',
+    soc: '13-1071',
+    description: 'Perform activities in the human resource area. Recruit and place workers. May perform employer-employee relations work.',
+    wages: { entry: 22.10, average: 33.29, experienced: 49.53 },
+  },
+  {
+    id: 'training_development',
+    title: 'Employee Training and Development',
+    soc: '13-1151',
+    description: 'Design or conduct work-related training and development programs to improve individual skills or organizational performance. May analyze training needs or evaluate effectiveness.',
+    wages: { entry: 24.70, average: 36.83, experienced: 55.37 },
+  },
+  {
+    id: 'training_manager',
+    title: 'Training & Development Manager',
+    soc: '11-3131',
+    description: 'Plan, direct, or coordinate the training and development activities and staff of an organization.',
+    wages: { entry: 38.40, average: 58.49, experienced: 88.72 },
+  },
+  {
+    id: 'benefits_administrator',
+    title: 'Benefits Administrator',
+    soc: '13-1141',
+    description: 'Research, analyze, and administer employee benefit programs including health, dental, retirement, and other insurance programs.',
+    wages: { entry: 21.46, average: 31.76, experienced: 46.78 },
+  },
+  {
+    id: 'recruiter',
+    title: 'Recruiter / Employment Specialist',
+    soc: '13-1071',
+    description: 'Recruit, screen, interview, and place workers. Consult with employers to identify employment needs and determine qualifications.',
+    wages: { entry: 22.10, average: 33.29, experienced: 49.53 },
+  },
+];
+
+// ─── MANAGEMENT OCCUPATIONS ────────────────────────────────────────────────
+export const MANAGEMENT_OCCUPATIONS = [
+  {
+    id: 'general_operations_manager',
+    title: 'General and Operations Manager',
+    soc: '11-1021',
+    description: 'Plan, direct, or coordinate the operations of public or private sector organizations. Duties include formulating policies, managing daily operations, and planning the use of materials and human resources.',
+    wages: { entry: 36.25, average: 62.21, experienced: 108.75 },
+  },
+  {
+    id: 'chief_executive',
+    title: 'Chief Executive Officer (CEO)',
+    soc: '11-1011',
+    description: 'Determine and formulate policies and provide overall direction of companies or private sector organizations within the guidelines set up by a board of directors or similar governing body.',
+    wages: { entry: 64.42, average: 100.00, experienced: 100.00 },
+  },
+  {
+    id: 'administrative_services_manager',
+    title: 'Administrative Services Manager',
+    soc: '11-3011',
+    description: 'Plan, direct, or coordinate one or more administrative services of an organization, such as records and information management, mail distribution, and other office support services.',
+    wages: { entry: 30.96, average: 50.83, experienced: 80.28 },
+  },
+  {
+    id: 'business_operations_specialist',
+    title: 'Business Operations Specialist',
+    soc: '13-1198',
+    description: 'Examine and evaluate business procedures and recommend improvements. Coordinate activities of diverse departments or staff.',
+    wages: { entry: 27.36, average: 40.77, experienced: 60.49 },
+  },
+];
+
+// ─── INDUSTRY-SPECIFIC OCCUPATION SETS (My Business) ──────────────────────
+// Each industry provides a curated list of relevant BLS occupations
+
+export const INDUSTRY_OCCUPATIONS = {
+  marketing_agency: [
+    {
+      id: 'internet_marketing_manager',
+      title: 'Internet Marketing Manager',
+      soc: '11-2021',
+      description: 'Plan, direct, or coordinate online marketing policies and programs. Determine demand for digital products/services. Develop digital pricing and campaign strategies.',
+      wages: { entry: 39.94, average: 64.32, experienced: 100.00 },
+    },
+    {
+      id: 'marketing_consultant_agency',
+      title: 'Marketing Consultant',
+      soc: '13-1161',
+      description: 'Research market conditions and gather information to determine potential sales of a product or service. May employ search marketing tactics and analyze web metrics.',
+      wages: { entry: 20.97, average: 33.08, experienced: 51.84 },
+    },
+    {
+      id: 'marketing_manager_agency',
+      title: 'Marketing Manager',
+      soc: '11-2021',
+      description: 'Plan, direct, or coordinate marketing campaigns, brand strategy, and client accounts.',
+      wages: { entry: 39.94, average: 64.32, experienced: 100.00 },
+    },
+    {
+      id: 'search_marketing_strategist',
+      title: 'Search Marketing Strategist',
+      soc: '13-1161',
+      description: 'Employ search marketing tactics, analyze web metrics, and develop recommendations to increase search engine ranking and visibility to target markets.',
+      wages: { entry: 20.97, average: 33.08, experienced: 51.84 },
+    },
+    {
+      id: 'social_media_manager',
+      title: 'Social Media Manager',
+      soc: '13-1199',
+      description: 'Develop and implement social media strategy across platforms. Create content calendars, manage brand presence, and track engagement metrics.',
+      wages: { entry: 22.50, average: 38.50, experienced: 60.10 },
+    },
+    {
+      id: 'content_creator',
+      title: 'Content Creator / Copywriter',
+      soc: '27-3043',
+      description: 'Write copy for advertisements, websites, and other marketing materials. Develop engaging content strategies for clients.',
+      wages: { entry: 19.23, average: 31.25, experienced: 49.08 },
+    },
+    {
+      id: 'account_manager_agency',
+      title: 'Account Manager',
+      soc: '11-2021',
+      description: 'Manage client relationships, oversee campaign delivery, and ensure client satisfaction and retention.',
+      wages: { entry: 39.94, average: 64.32, experienced: 100.00 },
+    },
+  ],
+
+  accounting_cpa: [
+    {
+      id: 'cpa_tax',
+      title: 'Certified Public Accountant (CPA)',
+      soc: '13-2011',
+      description: 'Examine and prepare financial records, ensure accuracy and compliance with laws and regulations. Provide tax advice and planning services.',
+      wages: { entry: 27.23, average: 40.26, experienced: 59.28 },
+    },
+    {
+      id: 'tax_advisor',
+      title: 'Tax Advisor / Tax Examiner',
+      soc: '13-2081',
+      description: 'Examine tax returns, detect errors, and advise clients on tax planning strategies. Review financial information for accuracy.',
+      wages: { entry: 19.86, average: 31.56, experienced: 48.45 },
+    },
+    {
+      id: 'financial_advisor_cpa',
+      title: 'Personal Financial Advisor',
+      soc: '13-2052',
+      description: 'Advise clients on financial plans using knowledge of tax and investment strategies, securities, insurance, pension plans, and real estate.',
+      wages: { entry: 26.82, average: 46.50, experienced: 80.02 },
+    },
+    {
+      id: 'forensic_accountant',
+      title: 'Forensic Accountant',
+      soc: '13-2011',
+      description: 'Investigate financial records for use in legal proceedings. Detect and deter fraud and white-collar crime.',
+      wages: { entry: 27.23, average: 40.26, experienced: 59.28 },
+    },
+    {
+      id: 'audit_manager',
+      title: 'Audit Manager',
+      soc: '13-2011',
+      description: 'Supervise and coordinate audits of financial records. Ensure compliance with accounting standards and regulatory requirements.',
+      wages: { entry: 27.23, average: 40.26, experienced: 59.28 },
+    },
+  ],
+
+  medical_practice: [
+    {
+      id: 'physician',
+      title: 'Physician / Doctor (General Practice)',
+      soc: '29-1062',
+      description: 'Diagnose and treat injuries or illnesses. Examine patients, take medical histories, prescribe medications, and order diagnostic tests.',
+      wages: { entry: 80.00, average: 119.00, experienced: 119.00 },
+    },
+    {
+      id: 'medical_director',
+      title: 'Medical Director',
+      soc: '11-9111',
+      description: 'Plan, direct, and coordinate medical programs and activities of a health care facility. Oversee staff, ensure quality of care, and manage operations.',
+      wages: { entry: 60.00, average: 94.00, experienced: 119.00 },
+    },
+    {
+      id: 'nurse_practitioner',
+      title: 'Nurse Practitioner',
+      soc: '29-1171',
+      description: 'Diagnose and treat acute, episodic, or chronic illness. Independently or as part of a healthcare team.',
+      wages: { entry: 45.80, average: 59.00, experienced: 76.32 },
+    },
+    {
+      id: 'physician_assistant',
+      title: 'Physician Assistant',
+      soc: '29-1071',
+      description: 'Provide healthcare services typically performed by a physician. Examine patients, diagnose injuries and illnesses, and provide treatment.',
+      wages: { entry: 44.58, average: 58.35, experienced: 74.25 },
+    },
+    {
+      id: 'clinical_manager',
+      title: 'Medical and Health Services Manager',
+      soc: '11-9111',
+      description: 'Plan, direct, or coordinate medical and health services. Manage clinics, public health organizations, or health departments.',
+      wages: { entry: 50.13, average: 76.48, experienced: 114.06 },
+    },
+  ],
+
+  law_firm: [
+    {
+      id: 'attorney',
+      title: 'Lawyer / Attorney',
+      soc: '23-1011',
+      description: 'Advise and represent individuals, businesses, and government agencies on legal issues and disputes. Research and analyze legal problems.',
+      wages: { entry: 43.47, average: 79.83, experienced: 119.00 },
+    },
+    {
+      id: 'paralegal',
+      title: 'Paralegal / Legal Assistant',
+      soc: '23-2011',
+      description: 'Assist lawyers by researching legal precedent, investigating facts, and preparing documents. Conduct research on relevant legal articles and judicial decisions.',
+      wages: { entry: 19.16, average: 29.58, experienced: 44.47 },
+    },
+    {
+      id: 'legal_researcher',
+      title: 'Legal Researcher',
+      soc: '23-2099',
+      description: 'Conduct legal research, analyze case law, and prepare memoranda summarizing findings for attorney review.',
+      wages: { entry: 22.10, average: 35.00, experienced: 52.00 },
+    },
+    {
+      id: 'managing_attorney',
+      title: 'Managing Attorney / Law Firm Administrator',
+      soc: '11-1021',
+      description: 'Manage the business operations of a law firm. Oversee staff, finances, client intake, and strategic direction.',
+      wages: { entry: 36.25, average: 62.21, experienced: 108.75 },
+    },
+  ],
+
+  it_technology: [
+    {
+      id: 'software_developer',
+      title: 'Software Developer',
+      soc: '15-1252',
+      description: 'Research, design, and develop computer and network software or specialized utility programs. Analyze user needs and develop software solutions.',
+      wages: { entry: 40.26, average: 58.34, experienced: 82.25 },
+    },
+    {
+      id: 'it_manager',
+      title: 'IT Manager / CTO',
+      soc: '11-3021',
+      description: 'Plan, direct, or coordinate activities in information technology departments. Determine organizational technology needs and recommend technical solutions.',
+      wages: { entry: 52.65, average: 77.66, experienced: 112.52 },
+    },
+    {
+      id: 'systems_analyst',
+      title: 'Systems Analyst',
+      soc: '15-1211',
+      description: 'Research problems and design solutions. Analyze science, engineering, business, and other data processing problems to implement and improve computer systems.',
+      wages: { entry: 34.40, average: 50.60, experienced: 73.85 },
+    },
+    {
+      id: 'it_project_manager',
+      title: 'IT Project Manager',
+      soc: '15-1299',
+      description: 'Plan, initiate, and manage information technology projects. Lead and guide the work of technical staff. Monitor progress and report to stakeholders.',
+      wages: { entry: 40.26, average: 58.34, experienced: 82.25 },
+    },
+    {
+      id: 'cybersecurity_analyst',
+      title: 'Cybersecurity Analyst',
+      soc: '15-1212',
+      description: 'Plan, implement, and upgrade security measures and controls. Protect computer networks and systems from hacking and cyberattacks.',
+      wages: { entry: 38.47, average: 56.50, experienced: 80.73 },
+    },
+    {
+      id: 'web_developer',
+      title: 'Web Developer',
+      soc: '15-1254',
+      description: 'Design, create, and modify web sites. Analyze user needs and implement websites to meet the needs of clients.',
+      wages: { entry: 24.75, average: 41.87, experienced: 66.63 },
+    },
+  ],
+
+  construction: [
+    {
+      id: 'construction_manager',
+      title: 'Construction Manager',
+      soc: '11-9021',
+      description: 'Plan, direct, or coordinate activities concerned with the construction and maintenance of structures, facilities, and systems.',
+      wages: { entry: 35.50, average: 52.47, experienced: 80.19 },
+    },
+    {
+      id: 'cost_estimator',
+      title: 'Cost Estimator / Project Estimator',
+      soc: '13-1051',
+      description: 'Prepare cost estimates for product manufacturing, construction projects, or services to aid management in bidding on or determining price of product or service.',
+      wages: { entry: 25.30, average: 37.40, experienced: 56.72 },
+    },
+    {
+      id: 'civil_engineer',
+      title: 'Civil Engineer',
+      soc: '17-2051',
+      description: 'Perform engineering duties in planning, designing, and overseeing construction and maintenance of building structures and facilities.',
+      wages: { entry: 33.27, average: 47.70, experienced: 67.75 },
+    },
+    {
+      id: 'architect',
+      title: 'Architect',
+      soc: '17-1011',
+      description: 'Plan and design structures, including houses, office buildings, and other structures. Coordinate with engineers, urban planners, interior designers, and landscape architects.',
+      wages: { entry: 31.25, average: 47.62, experienced: 70.04 },
+    },
+    {
+      id: 'project_superintendent',
+      title: 'Project Superintendent',
+      soc: '47-1011',
+      description: 'Directly supervise and coordinate activities of construction or extraction workers. Ensure all construction work meets specifications and safety standards.',
+      wages: { entry: 28.50, average: 42.65, experienced: 61.85 },
+    },
+  ],
+
+  real_estate: [
+    {
+      id: 'real_estate_broker',
+      title: 'Real Estate Broker',
+      soc: '41-9021',
+      description: 'Operate real estate offices, or work for commercial real estate firms, overseeing real estate transactions. Sell, exchange, rent or lease property for clients.',
+      wages: { entry: 22.43, average: 37.81, experienced: 71.25 },
+    },
+    {
+      id: 'real_estate_agent',
+      title: 'Real Estate Sales Agent',
+      soc: '41-9022',
+      description: 'Rent, buy, or sell property for clients. Perform duties such as study property listings, interview prospective clients, and accompany clients to property sites.',
+      wages: { entry: 16.59, average: 29.86, experienced: 52.81 },
+    },
+    {
+      id: 'property_manager',
+      title: 'Property Manager',
+      soc: '11-9141',
+      description: 'Plan, direct, or coordinate the selling, buying, leasing, or governance activities of commercial, industrial, or residential real estate properties.',
+      wages: { entry: 20.32, average: 33.31, experienced: 55.97 },
+    },
+    {
+      id: 'mortgage_loan_officer',
+      title: 'Mortgage Loan Officer',
+      soc: '13-2072',
+      description: 'Evaluate, authorize, or recommend approval of commercial, real estate, or credit loans. Advise borrowers on financial status and methods of payments.',
+      wages: { entry: 21.35, average: 36.07, experienced: 69.68 },
+    },
+  ],
+
+  restaurant_food: [
+    {
+      id: 'restaurant_manager',
+      title: 'Restaurant Manager',
+      soc: '11-9051',
+      description: 'Plan, direct, or coordinate activities of an organization or department that serves food and beverages. Manage staff, inventory, and customer experience.',
+      wages: { entry: 19.73, average: 30.13, experienced: 47.23 },
+    },
+    {
+      id: 'executive_chef',
+      title: 'Chef / Executive Chef',
+      soc: '35-1011',
+      description: 'Direct and may participate in the preparation, seasoning, and cooking of salads, soups, fish, meats, vegetables, desserts, or other foods.',
+      wages: { entry: 18.10, average: 27.66, experienced: 41.92 },
+    },
+    {
+      id: 'food_service_manager',
+      title: 'Food Service Manager',
+      soc: '11-9051',
+      description: 'Plan, direct, or coordinate activities of an organization or department that serves food and beverages.',
+      wages: { entry: 19.73, average: 30.13, experienced: 47.23 },
+    },
+    {
+      id: 'catering_manager',
+      title: 'Catering Manager',
+      soc: '11-9051',
+      description: 'Plan and manage catering operations, coordinate events, manage staff, and ensure food quality and service excellence.',
+      wages: { entry: 19.73, average: 30.13, experienced: 47.23 },
+    },
+  ],
+
+  retail: [
+    {
+      id: 'retail_store_manager',
+      title: 'Retail Store Manager',
+      soc: '41-1011',
+      description: 'Directly supervise and coordinate activities of retail sales workers. May perform management functions such as purchasing, budgeting, accounting, and personnel work.',
+      wages: { entry: 16.11, average: 23.26, experienced: 35.82 },
+    },
+    {
+      id: 'buyer_purchasing_agent',
+      title: 'Buyer / Purchasing Agent',
+      soc: '13-1022',
+      description: 'Buy merchandise or commodities, other than farm products, for resale to consumers at wholesale or retail level.',
+      wages: { entry: 24.03, average: 37.20, experienced: 57.19 },
+    },
+    {
+      id: 'merchandise_manager',
+      title: 'Merchandise / Retail Manager',
+      soc: '11-9081',
+      description: 'Plan, direct, and coordinate the activities of buyers, purchasing officers, and related workers involved in purchasing materials, products, and services.',
+      wages: { entry: 37.50, average: 62.06, experienced: 101.21 },
+    },
+    {
+      id: 'ecommerce_manager',
+      title: 'E-Commerce Manager',
+      soc: '11-2021',
+      description: 'Oversee the online sales channel, manage product listings, optimize conversion, and coordinate digital marketing efforts for retail operations.',
+      wages: { entry: 39.94, average: 64.32, experienced: 100.00 },
+    },
+  ],
+
+  insurance: [
+    {
+      id: 'insurance_agent',
+      title: 'Insurance Agent',
+      soc: '41-3021',
+      description: 'Sell life, property, casualty, health, automotive, or other types of insurance. May refer clients to independent brokers or sell other financial products.',
+      wages: { entry: 20.05, average: 34.35, experienced: 58.83 },
+    },
+    {
+      id: 'claims_adjuster',
+      title: 'Claims Adjuster',
+      soc: '13-1031',
+      description: 'Review settled claims to determine that payments and settlements are made in accordance with company practices and procedures.',
+      wages: { entry: 22.84, average: 34.85, experienced: 52.17 },
+    },
+    {
+      id: 'insurance_underwriter',
+      title: 'Insurance Underwriter',
+      soc: '13-2053',
+      description: 'Review insurance applications and decide if they should be approved. Analyze risk information to determine coverage and premiums.',
+      wages: { entry: 26.94, average: 40.17, experienced: 59.95 },
+    },
+    {
+      id: 'financial_advisor_ins',
+      title: 'Financial Services Representative',
+      soc: '13-2052',
+      description: 'Advise clients on financial plans, insurance needs, and investment strategies.',
+      wages: { entry: 26.82, average: 46.50, experienced: 80.02 },
+    },
+  ],
+
+  consulting: [
+    {
+      id: 'management_consultant',
+      title: 'Management Consultant',
+      soc: '13-1111',
+      description: 'Analyze and recommend ways to help organizations improve efficiency and profitability through reduced costs and increased revenues.',
+      wages: { entry: 30.36, average: 50.48, experienced: 85.58 },
+    },
+    {
+      id: 'business_analyst_consulting',
+      title: 'Business Analyst',
+      soc: '13-1198',
+      description: 'Analyze business processes and systems to identify improvements. Bridge the gap between business needs and technical solutions.',
+      wages: { entry: 27.36, average: 40.77, experienced: 60.49 },
+    },
+    {
+      id: 'strategy_consultant',
+      title: 'Strategy Consultant',
+      soc: '13-1111',
+      description: 'Advise organizations on high-level strategic direction, market positioning, and growth opportunities.',
+      wages: { entry: 30.36, average: 50.48, experienced: 85.58 },
+    },
+    {
+      id: 'it_consultant',
+      title: 'IT / Technology Consultant',
+      soc: '15-1299',
+      description: 'Advise clients on technology strategies, system implementations, and digital transformation initiatives.',
+      wages: { entry: 40.26, average: 58.34, experienced: 82.25 },
+    },
+    {
+      id: 'hr_consultant',
+      title: 'HR Consultant',
+      soc: '13-1071',
+      description: 'Advise organizations on human resources strategy, policy, compliance, and organizational effectiveness.',
+      wages: { entry: 22.10, average: 33.29, experienced: 49.53 },
+    },
+  ],
+
+  other: [
+    {
+      id: 'general_manager_other',
+      title: 'General Manager',
+      soc: '11-1021',
+      description: 'Plan, direct, or coordinate the operations of the business. Primary responsibilities include managing daily operations and planning use of materials and personnel.',
+      wages: { entry: 36.25, average: 62.21, experienced: 108.75 },
+    },
+    {
+      id: 'business_owner_operator',
+      title: 'Business Owner / Operator',
+      soc: '11-1021',
+      description: 'Own and operate a business. Responsible for all aspects of the business including strategy, operations, finance, and customer service.',
+      wages: { entry: 36.25, average: 62.21, experienced: 108.75 },
+    },
+    {
+      id: 'operations_specialist',
+      title: 'Operations Specialist',
+      soc: '13-1198',
+      description: 'Coordinate and oversee operational activities. Ensure efficient business processes and resource utilization.',
+      wages: { entry: 27.36, average: 40.77, experienced: 60.49 },
+    },
+  ],
+};
+
+// Helper: get all occupations for a category
+export function getOccupationsForCategory(categoryId, industry = null) {
+  switch (categoryId) {
+    case 'marketing':   return MARKETING_OCCUPATIONS;
+    case 'finance':     return FINANCE_OCCUPATIONS;
+    case 'hr':          return HR_OCCUPATIONS;
+    case 'management':  return MANAGEMENT_OCCUPATIONS;
+    case 'myBusiness':  return INDUSTRY_OCCUPATIONS[industry] || INDUSTRY_OCCUPATIONS.other;
+    default:            return [];
+  }
+}
+
+// Helper: get hourly wage for an occupation based on proficiency
+export function getWage(occupation, proficiency = 'average') {
+  return occupation.wages[proficiency] ?? occupation.wages.average;
+}
