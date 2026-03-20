@@ -181,23 +181,43 @@ export default function NewReport() {
               style={{ width: `${((step - 1) / (STEPS.length - 1)) * 100}%` }}
             />
 
-            {STEPS.map(s => (
-              <div key={s.id} className="flex flex-col items-center z-10">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors
-                  ${s.id < step  ? 'bg-brand-600 text-white' :
-                    s.id === step ? 'bg-brand-600 text-white ring-4 ring-brand-100' :
-                                    'bg-white border-2 border-gray-300 text-gray-400'}`}>
-                  {s.id < step ? (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  ) : s.id}
+            {STEPS.map(s => {
+              // Clickable if editing (all data loaded) or if already visited
+              const isClickable = isEditing || s.id <= step
+              return (
+                <div key={s.id} className="flex flex-col items-center z-10">
+                  <button
+                    onClick={() => isClickable && setStep(s.id)}
+                    disabled={!isClickable}
+                    title={isClickable ? `Go to ${s.label}` : undefined}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors focus:outline-none
+                      ${isClickable ? 'cursor-pointer' : 'cursor-default'}
+                      ${s.id < step  ? 'bg-brand-600 text-white hover:bg-brand-700' :
+                        s.id === step ? 'bg-brand-600 text-white ring-4 ring-brand-100' :
+                        isEditing     ? 'bg-white border-2 border-gray-300 text-gray-400 hover:border-brand-400 hover:text-brand-600' :
+                                        'bg-white border-2 border-gray-300 text-gray-400'}`}
+                  >
+                    {s.id < step ? (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : s.id}
+                  </button>
+                  <button
+                    onClick={() => isClickable && setStep(s.id)}
+                    disabled={!isClickable}
+                    className={`mt-2 text-xs font-medium hidden sm:block focus:outline-none
+                      ${isClickable ? 'cursor-pointer' : 'cursor-default'}
+                      ${s.id === step ? 'text-brand-600' :
+                        s.id < step   ? 'text-gray-500 hover:text-brand-600' :
+                        isEditing     ? 'text-gray-400 hover:text-brand-500' :
+                                        'text-gray-400'}`}
+                  >
+                    {s.label}
+                  </button>
                 </div>
-                <span className={`mt-2 text-xs font-medium hidden sm:block ${s.id === step ? 'text-brand-600' : 'text-gray-400'}`}>
-                  {s.label}
-                </span>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 

@@ -2,13 +2,15 @@ import { INDUSTRIES, DEFAULT_ALLOCATIONS } from '../../data/industries'
 
 export default function Step3Industry({ data, updateData, next, prev }) {
   function selectIndustry(industry) {
+    const isChanging = industry.id !== data.industryId
     updateData({
-      industryId:          industry.id,
-      industryLabel:       industry.label,
-      // Suggest default allocations for this industry
-      categoryAllocations: DEFAULT_ALLOCATIONS[industry.id] ?? DEFAULT_ALLOCATIONS.other,
-      // Clear previous task selections when industry changes
-      taskSelections: { marketing: [], finance: [], hr: [], management: [], myBusiness: [] },
+      industryId:    industry.id,
+      industryLabel: industry.label,
+      // Only reset allocations and tasks when the industry actually changes
+      ...(isChanging ? {
+        categoryAllocations: DEFAULT_ALLOCATIONS[industry.id] ?? DEFAULT_ALLOCATIONS.other,
+        taskSelections: { marketing: [], finance: [], hr: [], management: [], myBusiness: [] },
+      } : {}),
     })
   }
 
