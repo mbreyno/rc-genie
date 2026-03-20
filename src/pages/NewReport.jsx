@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import { computeReport } from '../utils/calculations'
@@ -40,12 +40,53 @@ const INITIAL_STATE = {
 }
 
 export default function NewReport() {
-  const { user } = useAuth()
-  const navigate  = useNavigate()
-  const [step,    setStep]    = useState(1)
-  const [data,    setData]    = useState(INITIAL_STATE)
-  const [saving,  setSaving]  = useState(false)
-  const [error,   setError]   = useState('')
+  const { user }   = useAuth()
+  const navigate   = useNavigate()
+  const { id }     = useParams()          // present when editing an existing report
+  const isEditing  = Boolean(id)
+
+  const [step,        setStep]        = useState(1)
+  const [data,        setData]        = useState(INITIAL_STATE)
+  const [saving,      setSaving]      = useState(false)
+  const [loadingEdit, setLoadingEdit] = useState(isEditing)
+  const [error,       setError]       = useState('')
+
+  // When editing, load the existing report and pre-populate the wizard
+  useEffect(() => {
+    if (!isEditing || !user) return
+    async function loadExisting() {
+      const { data: report, error } = await supabase
+        .from('reports')
+        .select('*')
+        .eq('id', id)
+        .eq('advisor_id', user.id)
+        .single()
+      if (error || !report) { setError('Report not found.'); setLoadingEdit(false); return }
+
+      // Rebuild taskSelections grouped by category from the flat tasks array
+      const taskSelections = { marketing: [], finance: [], hr: [], management: [], myBusiness: [] }
+      for (const task of (report.tasks ?? [])) {
+        const cat = task.categoryId
+        if (taskSelections[cat]) taskSelections[cat].push(task)
+      }
+
+      setData({
+        clientFirstName:     report.client_first_name,
+        clientLastName:      report.client_last_name,
+        companyName:         report.company_name,
+        hoursWorked:         report.hours_worked,
+        stateName:           report.state_name,
+        stateFips:           report.state_fips,
+        county:              report.county,
+        industryId:          report.industry_id,
+        industryLabel:       report.industry_label,
+        categoryAllocations: report.category_allocations,
+        taskSelections,
+      })
+      setLoadingEdit(false)
+    }
+    loadExisting()
+  }, [isEditing, id, user])
 
   function updateData(partial) {
     setData(prev => ({ ...prev, ...partial }))
@@ -58,31 +99,45 @@ export default function NewReport() {
     setSaving(true)
     setError('')
     try {
-      const { tasks, totalCompensation, categoryTotals } = computeReport(data)
+      const { tasks, totalCompensation } = computeReport(data)
 
-      const { data: saved, error: dbError } = await supabase
-        .from('reports')
-        .insert({
-          advisor_id:           user.id,
-          client_first_name:    data.clientFirstName,
-          client_last_name:     data.clientLastName,
-          company_name:         data.companyName,
-          state_name:           data.stateName,
-          state_fips:           data.stateFips,
-          county:               data.county,
-          hours_worked:         data.hoursWorked,
-          industry_id:          data.industryId,
-          industry_label:       data.industryLabel,
-          category_allocations: data.categoryAllocations,
-          tasks:                tasks,
-          total_compensation:   totalCompensation,
-          report_year:          new Date().getFullYear(),
-        })
-        .select('id')
-        .single()
+      const reportData = {
+        client_first_name:    data.clientFirstName,
+        client_last_name:     data.clientLastName,
+        company_name:         data.companyName,
+        state_name:           data.stateName,
+        state_fips:           data.stateFips,
+        county:               data.county,
+        hours_worked:         data.hoursWorked,
+        industry_id:          data.industryId,
+        industry_label:       data.industryLabel,
+        category_allocations: data.categoryAllocations,
+        tasks,
+        total_compensation:   totalCompensation,
+        report_year:          new Date().getFullYear(),
+      }
 
-      if (dbError) throw new Error(dbError.message)
-      navigate(`/report/${saved.id}`)
+      let savedId = id
+      if (isEditing) {
+        // Update existing report
+        const { error: dbError } = await supabase
+          .from('reports')
+          .update(reportData)
+          .eq('id', id)
+          .eq('advisor_id', user.id)
+        if (dbError) throw new Error(dbError.message)
+      } else {
+        // Insert new report
+        const { data: saved, error: dbError } = await supabase
+          .from('reports')
+          .insert({ ...reportData, advisor_id: user.id })
+          .select('id')
+          .single()
+        if (dbError) throw new Error(dbError.message)
+        savedId = saved.id
+      }
+
+      navigate(`/report/${savedId}`)
     } catch (err) {
       setError(err.message)
       setSaving(false)
@@ -91,17 +146,27 @@ export default function NewReport() {
 
   const stepProps = { data, updateData, next, prev }
 
+  if (loadingEdit) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-400">Loading report…</div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top nav */}
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-3">
-          <Link to="/dashboard" className="text-gray-400 hover:text-gray-600">
+          <Link to={isEditing ? `/report/${id}` : '/dashboard'} className="text-gray-400 hover:text-gray-600">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          <span className="font-semibold text-gray-900">New Reasonable Compensation Report</span>
+          <span className="font-semibold text-gray-900">
+            {isEditing ? 'Edit Report' : 'New Reasonable Compensation Report'}
+          </span>
         </div>
       </nav>
 

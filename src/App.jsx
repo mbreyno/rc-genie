@@ -36,8 +36,9 @@ export default function App() {
           {/* Protected */}
           <Route path="/dashboard"    element={<ProtectedRoute><Dashboard  /></ProtectedRoute>} />
           <Route path="/profile"      element={<ProtectedRoute><Profile    /></ProtectedRoute>} />
-          <Route path="/report/new"   element={<ProtectedRoute><NewReport  /></ProtectedRoute>} />
-          <Route path="/report/:id"   element={<ProtectedRoute><ReportView /></ProtectedRoute>} />
+          <Route path="/report/new"        element={<ProtectedRoute><NewReport  /></ProtectedRoute>} />
+          <Route path="/report/:id/edit"  element={<ProtectedRoute><NewReport  /></ProtectedRoute>} />
+          <Route path="/report/:id"       element={<ProtectedRoute><ReportView /></ProtectedRoute>} />
 
           {/* Default */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
