@@ -918,13 +918,22 @@ export const INDUSTRY_OCCUPATIONS = {
 };
 
 // Helper: get all occupations for a category
-export function getOccupationsForCategory(categoryId, industry = null) {
+// For 'myBusiness', industryId is now a BLS group id like 'grp_29'.
+// Falls back to legacy INDUSTRY_OCCUPATIONS for any old custom industry ids still in use.
+import { BLS_OCCUPATIONS } from './blsOccupations.js'
+
+export function getOccupationsForCategory(categoryId, industryId = null) {
   switch (categoryId) {
     case 'marketing':   return MARKETING_OCCUPATIONS;
     case 'finance':     return FINANCE_OCCUPATIONS;
     case 'hr':          return HR_OCCUPATIONS;
     case 'management':  return MANAGEMENT_OCCUPATIONS;
-    case 'myBusiness':  return INDUSTRY_OCCUPATIONS[industry] || INDUSTRY_OCCUPATIONS.other;
+    case 'myBusiness': {
+      // New BLS group ids (grp_11, grp_13, etc.)
+      if (industryId && BLS_OCCUPATIONS[industryId]) return BLS_OCCUPATIONS[industryId];
+      // Legacy custom industry fallback
+      return INDUSTRY_OCCUPATIONS[industryId] || INDUSTRY_OCCUPATIONS.other;
+    }
     default:            return [];
   }
 }
