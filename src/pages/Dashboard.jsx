@@ -20,7 +20,7 @@ export default function Dashboard() {
     setLoading(true)
     const { data } = await supabase
       .from('reports')
-      .select('id, client_first_name, client_last_name, company_name, state_name, county, total_compensation, report_year, created_at')
+      .select('id, client_first_name, client_last_name, company_name, state_name, msa_name, total_compensation, report_year, created_at')
       .eq('advisor_id', user.id)
       .order('created_at', { ascending: false })
     setReports(data ?? [])
@@ -142,7 +142,7 @@ export default function Dashboard() {
                     </td>
                     <td className="px-6 py-4 text-gray-600 hidden sm:table-cell">{r.company_name}</td>
                     <td className="px-6 py-4 text-gray-600 hidden md:table-cell">
-                      {r.county}, {r.state_name}
+                      {r.msa_name ? `${r.msa_name}, ` : ''}{r.state_name}
                     </td>
                     <td className="px-6 py-4 text-gray-600 hidden lg:table-cell">{r.report_year}</td>
                     <td className="px-6 py-4 text-right font-semibold text-gray-900">

@@ -99,7 +99,7 @@ function Page1({ report, advisor, tasks, totalCompensation, categoryTotals }) {
         Compensation based on the type of work performed, the skill level of the work performed and
         the number of hours the work is performed annually. You told us that you work{' '}
         <strong>{report.hours_worked.toLocaleString()}</strong> hours per year in{' '}
-        <strong>{report.county}, {report.state_name}</strong>. Our analysis indicates the annual salary of{' '}
+        <strong>{report.msa_name ? `${report.msa_name}, ` : ''}{report.state_name}</strong>. Our analysis indicates the annual salary of{' '}
         <strong>{formatCurrency(totalCompensation)}</strong> would be a reasonable cost to hire
         employee(s) to perform the duties and responsibilities that you currently perform.
       </p>
@@ -260,7 +260,7 @@ function Page4BusinessSummary({ report, advisor }) {
         <div>Calculated For: {report.client_first_name} {report.client_last_name}</div>
         <div>Company: {report.company_name}</div>
         <div>Report Year: {report.report_year}</div>
-        <div>Location: {report.county}, {report.state_name}</div>
+        <div>Location: {report.msa_name ? `${report.msa_name}, ` : ''}{report.state_name}</div>
         <div>Hours Worked: {report.hours_worked.toLocaleString()}</div>
         <div>Report Finalized: {dateStr}</div>
       </div>

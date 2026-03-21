@@ -1,12 +1,33 @@
 import { US_STATES, HOURS_OPTIONS } from '../../data/industries'
+import { MSAS_BY_STATE } from '../../data/msas'
 
 export default function Step2HoursLocation({ data, updateData, next, prev }) {
-  const valid = data.stateName && data.county.trim() && data.hoursWorked
+  const msaOptions = data.stateFips ? (MSAS_BY_STATE[data.stateFips] ?? []) : []
+  const valid = data.stateName && data.hoursWorked
+
+  function handleStateChange(e) {
+    const state = US_STATES.find(s => s.fips === e.target.value)
+    // Reset MSA when state changes
+    updateData({
+      stateFips: e.target.value,
+      stateName: state?.name ?? '',
+      msaCode:   '',
+      msaName:   '',
+    })
+  }
+
+  function handleMsaChange(e) {
+    const msa = msaOptions.find(m => m.cbsa === e.target.value)
+    updateData({
+      msaCode: e.target.value,
+      msaName: msa?.name ?? '',
+    })
+  }
 
   return (
     <div className="card">
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Hours & Location</h2>
+        <h2 className="text-xl font-bold text-gray-900">Hours &amp; Location</h2>
         <p className="text-gray-500 mt-1">
           The owner's work hours and location are used to find the appropriate BLS wage data.
         </p>
@@ -36,10 +57,7 @@ export default function Step2HoursLocation({ data, updateData, next, prev }) {
           <select
             className="form-input"
             value={data.stateFips}
-            onChange={e => {
-              const state = US_STATES.find(s => s.fips === e.target.value)
-              updateData({ stateFips: e.target.value, stateName: state?.name ?? '' })
-            }}
+            onChange={handleStateChange}
           >
             <option value="">Select a state…</option>
             {US_STATES.map(s => (
@@ -48,18 +66,28 @@ export default function Step2HoursLocation({ data, updateData, next, prev }) {
           </select>
         </div>
 
-        {/* County */}
-        <div>
-          <label className="form-label">County *</label>
-          <input
-            type="text" className="form-input" placeholder="e.g. Johnson County"
-            value={data.county}
-            onChange={e => updateData({ county: e.target.value })}
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Enter the county where the owner primarily performs their work.
-          </p>
-        </div>
+        {/* Metropolitan Area */}
+        {data.stateFips && (
+          <div>
+            <label className="form-label">Metropolitan area</label>
+            <select
+              className="form-input"
+              value={data.msaCode}
+              onChange={handleMsaChange}
+              disabled={msaOptions.length === 0}
+            >
+              <option value="">Statewide (no specific metro)</option>
+              {msaOptions.map(m => (
+                <option key={m.cbsa} value={m.cbsa}>{m.name}</option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              {data.msaCode
+                ? 'BLS wage data will be pulled for this metro area, with statewide data as a fallback.'
+                : 'Select a metro area for more location-specific wage data, or leave blank to use statewide averages.'}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="mt-8 flex justify-between">

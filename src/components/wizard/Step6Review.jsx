@@ -25,7 +25,7 @@ export default function Step6Review({ data, prev, onGenerate, generating }) {
         <div className="text-4xl font-bold">{formatCurrency(totalCompensation)}</div>
         <div className="mt-3 text-brand-200 text-sm">
           For {data.clientFirstName} {data.clientLastName} of {data.companyName} —{' '}
-          {data.hoursWorked.toLocaleString()} hours/yr in {data.county}, {data.stateName}
+          {data.hoursWorked.toLocaleString()} hours/yr in {data.msaName ? `${data.msaName}, ` : ''}{data.stateName}
         </div>
       </div>
 
@@ -36,7 +36,7 @@ export default function Step6Review({ data, prev, onGenerate, generating }) {
           {[
             ['Client',    `${data.clientFirstName} ${data.clientLastName}`],
             ['Company',   data.companyName],
-            ['Location',  `${data.county}, ${data.stateName}`],
+            ['Location',  data.msaName ? `${data.msaName}, ${data.stateName}` : data.stateName],
             ['Industry',  data.industryLabel],
             ['Hours/yr',  data.hoursWorked.toLocaleString()],
             ['Year',      new Date().getFullYear()],
