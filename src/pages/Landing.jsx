@@ -114,7 +114,7 @@ export default function Landing() {
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-            RC Genie helps advisors and tax professionals establish a defensible reasonable salary
+            RC Genie helps financial advisors and tax professionals establish a defensible reasonable salary
             for S-Corp owner-employees using the IRS-accepted Cost Approach and live BLS wage data —
             and delivers a branded, client-ready PDF report in minutes.
           </p>
@@ -140,9 +140,9 @@ export default function Landing() {
             <div className="flex items-center justify-between mb-5">
               <div>
                 <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold">Sample Report</p>
-                <p className="font-bold text-gray-900 text-lg mt-0.5">Jennifer Denney — Elevated Marketing Solutions</p>
+                <p className="font-bold text-gray-900 text-lg mt-0.5">Deanna Troi — Empathic Counseling Inc.</p>
               </div>
-              <span className="text-xs font-semibold bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full">2025</span>
+              <span className="text-xs font-semibold bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full">{new Date().getFullYear()}</span>
             </div>
             <div className="grid grid-cols-3 gap-4 mb-5">
               {[
@@ -187,7 +187,7 @@ export default function Landing() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
-              { icon: '💼', title: 'CPAs & Tax Preparers', desc: 'Satisfy IRS reasonable compensation requirements with a documented, data-driven salary figure for every S-Corp client.' },
+              { icon: '💼', title: 'Tax & Accounting Professionals', desc: 'Satisfy IRS reasonable compensation requirements with a documented, data-driven salary figure for every S-Corp client.' },
               { icon: '📊', title: 'Financial Advisors',   desc: 'Help clients understand the tax savings implications of their officer compensation and plan accordingly.' },
               { icon: '⚖️', title: 'Tax Attorneys',        desc: 'Build a defensible compensation record that holds up in audit or litigation with BLS-sourced documentation.' },
             ].map(item => (
