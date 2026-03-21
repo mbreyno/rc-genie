@@ -305,6 +305,89 @@ export const INDUSTRY_OCCUPATIONS = {
     },
   ],
 
+  financial_planning: [
+    {
+      id: 'personal_financial_advisor',
+      title: 'Personal Financial Advisor',
+      soc: '13-2052',
+      description: 'Advise clients on financial plans and strategies. Assess clients\' financial situations and recommend investments, insurance, and tax planning approaches.',
+      wages: { entry: 26.82, average: 46.50, experienced: 80.02 },
+    },
+    {
+      id: 'wealth_manager',
+      title: 'Wealth Manager / Financial Planner',
+      soc: '13-2052',
+      description: 'Provide comprehensive financial planning services including investment management, estate planning, retirement planning, and tax optimization for high-net-worth clients.',
+      wages: { entry: 26.82, average: 46.50, experienced: 80.02 },
+    },
+    {
+      id: 'investment_advisor',
+      title: 'Investment Advisor / Portfolio Manager',
+      soc: '13-2099',
+      description: 'Manage client investment portfolios, conduct security analysis, and provide investment recommendations. May oversee asset allocation strategies.',
+      wages: { entry: 32.00, average: 55.00, experienced: 95.00 },
+    },
+    {
+      id: 'securities_sales_agent',
+      title: 'Securities / Financial Services Sales Agent',
+      soc: '41-3031',
+      description: 'Buy and sell securities or commodities in investment and trading firms. Advise clients on financial products and market conditions.',
+      wages: { entry: 28.40, average: 60.40, experienced: 119.00 },
+    },
+    {
+      id: 'financial_planning_director',
+      title: 'Financial Planning Practice Manager',
+      soc: '11-3031',
+      description: 'Plan, direct, or coordinate the financial planning practice. Oversee advisors, manage compliance, and guide overall business strategy.',
+      wages: { entry: 46.26, average: 71.68, experienced: 114.24 },
+    },
+  ],
+
+  mental_health: [
+    {
+      id: 'mental_health_counselor',
+      title: 'Mental Health Counselor / Therapist',
+      soc: '21-1014',
+      description: 'Counsel clients with mental and emotional disorders and provide mental health services. Use various therapeutic techniques to treat mental and emotional disorders.',
+      wages: { entry: 21.06, average: 29.50, experienced: 44.00 },
+    },
+    {
+      id: 'marriage_family_therapist',
+      title: 'Marriage and Family Therapist',
+      soc: '21-1013',
+      description: 'Diagnose and treat mental and emotional disorders in the context of marriage, couples, and family systems. Apply psychotherapeutic and family systems theories.',
+      wages: { entry: 23.00, average: 32.23, experienced: 48.73 },
+    },
+    {
+      id: 'clinical_social_worker',
+      title: 'Clinical Social Worker (LCSW)',
+      soc: '21-1023',
+      description: 'Assess and treat individuals, families, and groups to improve mental health and overall wellbeing. Provide psychotherapy and connect clients to community resources.',
+      wages: { entry: 21.00, average: 30.54, experienced: 44.15 },
+    },
+    {
+      id: 'psychologist',
+      title: 'Psychologist / Clinical Psychologist',
+      soc: '19-3031',
+      description: 'Diagnose and treat mental, behavioral, and emotional disorders. Use assessment methods and evidence-based psychotherapeutic techniques.',
+      wages: { entry: 37.22, average: 54.00, experienced: 78.36 },
+    },
+    {
+      id: 'substance_abuse_counselor',
+      title: 'Substance Abuse / Addiction Counselor',
+      soc: '21-1011',
+      description: 'Counsel clients to help them recover from addiction to alcohol, tobacco, or other substances. May counsel clients who are experiencing behavioral issues.',
+      wages: { entry: 18.10, average: 26.50, experienced: 38.50 },
+    },
+    {
+      id: 'behavioral_health_director',
+      title: 'Behavioral Health Practice Director',
+      soc: '11-9111',
+      description: 'Plan, direct, or coordinate the operations of a mental health or behavioral health practice. Oversee clinical staff, ensure quality of care, and manage operations.',
+      wages: { entry: 50.13, average: 76.48, experienced: 114.06 },
+    },
+  ],
+
   accounting_cpa: [
     {
       id: 'cpa_tax',
@@ -378,6 +461,158 @@ export const INDUSTRY_OCCUPATIONS = {
       soc: '11-9111',
       description: 'Plan, direct, or coordinate medical and health services. Manage clinics, public health organizations, or health departments.',
       wages: { entry: 50.13, average: 76.48, experienced: 114.06 },
+    },
+  ],
+
+  dental: [
+    {
+      id: 'dentist_general',
+      title: 'Dentist (General Practice)',
+      soc: '29-1021',
+      description: 'Diagnose and treat problems with teeth and tissues in the mouth. Provide preventive care, perform restorations, and educate patients on oral health.',
+      wages: { entry: 67.00, average: 108.00, experienced: 119.00 },
+    },
+    {
+      id: 'orthodontist',
+      title: 'Orthodontist',
+      soc: '29-1023',
+      description: 'Examine, diagnose, and treat dental malocclusions and oral cavity anomalies. Design and fabricate appliances to realign teeth and jaw.',
+      wages: { entry: 100.00, average: 119.00, experienced: 119.00 },
+    },
+    {
+      id: 'oral_surgeon',
+      title: 'Oral and Maxillofacial Surgeon',
+      soc: '29-1022',
+      description: 'Perform surgery on the hard and soft tissues of the oral and maxillofacial regions to treat diseases, injuries, and defects.',
+      wages: { entry: 100.00, average: 119.00, experienced: 119.00 },
+    },
+    {
+      id: 'dental_hygienist',
+      title: 'Dental Hygienist',
+      soc: '29-2021',
+      description: 'Clean teeth and examine oral areas, head, and neck for signs of oral disease. Provide preventive dental care and oral health education.',
+      wages: { entry: 30.49, average: 43.32, experienced: 59.51 },
+    },
+    {
+      id: 'dental_practice_manager',
+      title: 'Dental Practice Manager',
+      soc: '11-9111',
+      description: 'Manage the daily operations of a dental practice. Oversee scheduling, billing, staff management, and compliance with dental regulations.',
+      wages: { entry: 50.13, average: 76.48, experienced: 114.06 },
+    },
+  ],
+
+  chiropractic_rehab: [
+    {
+      id: 'chiropractor',
+      title: 'Chiropractor',
+      soc: '29-1011',
+      description: 'Assess, diagnose, and treat patients with health problems related to the musculoskeletal system. Manipulate or adjust the spine or other joints.',
+      wages: { entry: 31.25, average: 49.93, experienced: 85.00 },
+    },
+    {
+      id: 'physical_therapist',
+      title: 'Physical Therapist',
+      soc: '29-1123',
+      description: 'Assess, plan, organize, and participate in rehabilitative programs that improve mobility, relieve pain, increase strength, and improve function.',
+      wages: { entry: 35.77, average: 48.49, experienced: 64.75 },
+    },
+    {
+      id: 'occupational_therapist',
+      title: 'Occupational Therapist',
+      soc: '29-1122',
+      description: 'Assess, plan, and organize rehabilitative programs that help people regain or develop functional skills necessary for daily living and work.',
+      wages: { entry: 34.47, average: 46.31, experienced: 60.45 },
+    },
+    {
+      id: 'rehabilitation_specialist',
+      title: 'Rehabilitation Specialist',
+      soc: '29-1123',
+      description: 'Develop and implement individualized rehabilitation programs. Coordinate care across disciplines to optimize patient recovery outcomes.',
+      wages: { entry: 35.77, average: 48.49, experienced: 64.75 },
+    },
+    {
+      id: 'clinic_director_rehab',
+      title: 'Clinic Director / Practice Owner',
+      soc: '11-9111',
+      description: 'Lead and manage a chiropractic or rehabilitation practice. Responsible for clinical quality, staff supervision, patient outcomes, and business performance.',
+      wages: { entry: 50.13, average: 76.48, experienced: 114.06 },
+    },
+  ],
+
+  veterinary: [
+    {
+      id: 'veterinarian',
+      title: 'Veterinarian',
+      soc: '29-1131',
+      description: 'Diagnose and treat diseases, disorders, and injuries in animals. Perform surgeries, prescribe medications, and advise owners on animal care.',
+      wages: { entry: 40.89, average: 58.71, experienced: 84.10 },
+    },
+    {
+      id: 'veterinary_specialist',
+      title: 'Veterinary Specialist (Surgery / Internal Medicine)',
+      soc: '29-1131',
+      description: 'Provide specialty veterinary care in areas such as surgery, oncology, cardiology, or internal medicine. Treat complex or critical cases.',
+      wages: { entry: 52.00, average: 75.00, experienced: 105.00 },
+    },
+    {
+      id: 'veterinary_technician',
+      title: 'Veterinary Technician / Technologist',
+      soc: '29-2056',
+      description: 'Perform medical tests in a laboratory environment for use in the treatment and diagnosis of diseases in animals. Assist veterinarians during procedures.',
+      wages: { entry: 16.37, average: 22.32, experienced: 30.18 },
+    },
+    {
+      id: 'veterinary_practice_manager',
+      title: 'Veterinary Practice Manager',
+      soc: '11-9111',
+      description: 'Oversee the daily operations of a veterinary clinic. Manage staff scheduling, inventory, client relations, and regulatory compliance.',
+      wages: { entry: 50.13, average: 76.48, experienced: 114.06 },
+    },
+  ],
+
+  architecture_engineering: [
+    {
+      id: 'architect_ae',
+      title: 'Architect',
+      soc: '17-1011',
+      description: 'Plan and design structures such as private residences, office buildings, theaters, and government buildings. Coordinate with engineers and clients.',
+      wages: { entry: 31.25, average: 47.62, experienced: 70.04 },
+    },
+    {
+      id: 'civil_engineer_ae',
+      title: 'Civil Engineer',
+      soc: '17-2051',
+      description: 'Design, construct, and supervise infrastructure projects including roads, bridges, water systems, and buildings.',
+      wages: { entry: 33.27, average: 47.70, experienced: 67.75 },
+    },
+    {
+      id: 'structural_engineer',
+      title: 'Structural Engineer',
+      soc: '17-2051',
+      description: 'Analyze and design the structural components of buildings and infrastructure. Ensure structural integrity, safety, and compliance with building codes.',
+      wages: { entry: 33.27, average: 47.70, experienced: 67.75 },
+    },
+    {
+      id: 'mechanical_engineer',
+      title: 'Mechanical Engineer',
+      soc: '17-2141',
+      description: 'Research, design, develop, build, and test mechanical and thermal sensors and devices including tools, engines, and machines.',
+      wages: { entry: 37.31, average: 53.55, experienced: 76.10 },
+    },
+    {
+      id: 'electrical_engineer',
+      title: 'Electrical Engineer',
+      soc: '17-2071',
+      description: 'Design, develop, test, and supervise the manufacture of electrical equipment. Conduct research, evaluate systems, and recommend design modifications.',
+      wages: { entry: 40.62, average: 58.89, experienced: 84.17 },
+    },
+    {
+      id: 'project_manager_ae',
+      title: 'Project Manager (A/E)',
+      soc: '11-9021',
+      description: 'Plan, direct, and coordinate architecture or engineering projects. Manage timelines, budgets, client relationships, and cross-disciplinary teams.',
+      wages: { entry: 35.50, average: 52.47, experienced: 80.19 },
     },
   ],
 
