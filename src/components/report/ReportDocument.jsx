@@ -1,10 +1,14 @@
 /**
  * Reasonable Compensation Report — original layout with light modern styling.
  *
- * html2pdf fixes applied:
- *  1. pageBreakBefore:'always' on pages 2+ instead of pageBreakAfter — eliminates blank pages
- *  2. Chart columns use a <table> instead of flex — prevents SVG right-side clipping
- *  3. minHeight (not height) on Page — content never gets clipped by overflow:hidden
+ * html2pdf pagination strategy:
+ *  - Each Page div is EXACTLY 1056px tall (height, not minHeight) with overflow:hidden.
+ *    html2pdf slices the rendered content every 1056px — pages align perfectly.
+ *  - No pageBreakBefore/pageBreakAfter needed; exact height IS the page break.
+ *  - Footer is a flex item (not position:absolute) so it stays inside the 1056px boundary.
+ *  - Outer container has NO padding — any top offset shifts all pages out of alignment.
+ *  - Charts use <canvas> + useEffect so html2canvas copies pixel data directly —
+ *    no SVG arc interpretation, no clipping of small segments.
  */
 import { useEffect, useRef } from 'react'
 import { CATEGORIES } from '../../data/occupations'
@@ -22,7 +26,8 @@ function Page({ children, logoUrl, firmName, clientName, companyName, reportYear
   return (
     <div style={{
       width: '816px',
-      minHeight: '1056px',
+      height: '1056px',       // EXACT — html2pdf slices every 1056px; must match precisely
+      overflow: 'hidden',     // clip any accidental overflow so nothing bleeds into the next page
       boxSizing: 'border-box',
       display: 'flex',
       flexDirection: 'column',
@@ -30,10 +35,7 @@ function Page({ children, logoUrl, firmName, clientName, companyName, reportYear
       fontFamily: 'Arial, Helvetica, sans-serif',
       fontSize: '11px',
       color: '#1a1a1a',
-      // pageBreakBefore on pages 2+ eliminates the spurious blank page that
-      // pageBreakAfter creates when the previous page's content is short.
-      pageBreakBefore: pageNum === 1 ? 'auto' : 'always',
-      position: 'relative',
+      // No pageBreak properties — exact height handles natural PDF pagination
     }}>
 
       {/* Thin brand-blue accent strip at top */}
@@ -65,13 +67,13 @@ function Page({ children, logoUrl, firmName, clientName, companyName, reportYear
         </div>
       </div>
 
-      {/* Body */}
-      <div style={{ flex: 1, padding: '36px 64px 72px' }}>{children}</div>
+      {/* Body — flex: 1 fills remaining space between header and footer */}
+      <div style={{ flex: 1, padding: '32px 64px 24px', overflow: 'hidden' }}>{children}</div>
 
-      {/* Footer */}
+      {/* Footer — flex item (NOT position:absolute) so it stays within the 1056px boundary */}
       <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        padding: '9px 64px 12px',
+        flexShrink: 0,
+        padding: '8px 64px 10px',
         borderTop: '1px solid #e5e7eb',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         backgroundColor: 'white', fontSize: '9px',
@@ -551,7 +553,7 @@ export default function ReportDocument({ report, advisorProfile, tasks, totalCom
   }
 
   return (
-    <div id="report-document" style={{ backgroundColor: '#f3f4f6', padding: '20px 0' }}>
+    <div id="report-document" style={{ backgroundColor: '#f3f4f6' }}>
       <Page1
         report={report} advisor={advisor}
         totalCompensation={totalCompensation} categoryTotals={categoryTotals}
