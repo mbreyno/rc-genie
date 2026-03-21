@@ -7,7 +7,7 @@
 export const CATEGORIES = {
   marketing: {
     id: 'marketing',
-    label: 'Marketing',
+    label: 'Marketing & Sales',
     color: '#f4a261',
     description: 'Sales, market research, advertising, and customer-facing activities',
   },
