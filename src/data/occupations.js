@@ -892,6 +892,544 @@ export const INDUSTRY_OCCUPATIONS = {
     },
   ],
 
+  // ─── TRADES & CONSTRUCTION ────────────────────────────────────────────────
+  trades: [
+    {
+      id: 'plumber',
+      title: 'Plumber',
+      soc: '47-2152',
+      description: 'Assemble, install, and repair pipes, fittings, and fixtures of heating, water, and drainage systems according to specifications and plumbing codes.',
+      wages: { entry: 26.43, average: 30.53, experienced: 51.20 },
+    },
+    {
+      id: 'hvac_technician',
+      title: 'HVAC Technician',
+      soc: '49-9021',
+      description: 'Install, service, and repair heating, ventilation, air conditioning, and refrigeration systems in residential and commercial buildings.',
+      wages: { entry: 22.50, average: 27.84, experienced: 42.56 },
+    },
+    {
+      id: 'electrician',
+      title: 'Electrician',
+      soc: '47-2111',
+      description: 'Install, maintain, and repair electrical wiring, equipment, and fixtures. Ensure that work is in accordance with relevant codes.',
+      wages: { entry: 23.11, average: 30.64, experienced: 47.99 },
+    },
+    {
+      id: 'pipefitter_steamfitter',
+      title: 'Pipefitter / Steamfitter',
+      soc: '47-2152',
+      description: 'Lay out, assemble, install, and maintain pipe systems, pipe supports, and related hydraulic and pneumatic equipment.',
+      wages: { entry: 28.00, average: 36.94, experienced: 56.00 },
+    },
+    {
+      id: 'trades_owner_operator',
+      title: 'Trades Business Owner / Operator',
+      soc: '11-1021',
+      description: 'Own and operate a skilled trades contracting business. Oversee job bidding, project scheduling, crew management, and quality control.',
+      wages: { entry: 36.25, average: 55.00, experienced: 90.00 },
+    },
+  ],
+
+  landscaping: [
+    {
+      id: 'landscape_architect',
+      title: 'Landscape Architect',
+      soc: '17-1012',
+      description: 'Plan and design land areas for projects such as parks, recreational facilities, and commercial developments.',
+      wages: { entry: 26.25, average: 37.39, experienced: 54.78 },
+    },
+    {
+      id: 'landscaping_supervisor',
+      title: 'Landscaping / Groundskeeping Supervisor',
+      soc: '37-1012',
+      description: 'Directly supervise and coordinate activities of workers engaged in landscaping or groundskeeping activities.',
+      wages: { entry: 18.85, average: 24.75, experienced: 35.58 },
+    },
+    {
+      id: 'tree_trimmer',
+      title: 'Tree Trimmer / Arborist',
+      soc: '37-3013',
+      description: 'Cut, trim, and remove trees and branches using hand tools and power equipment. May also diagnose and treat tree diseases.',
+      wages: { entry: 16.33, average: 22.73, experienced: 33.94 },
+    },
+    {
+      id: 'landscaping_owner',
+      title: 'Landscaping Business Owner',
+      soc: '11-1021',
+      description: 'Own and operate a landscaping or lawn care business. Manage client accounts, crew scheduling, equipment, and seasonal service contracts.',
+      wages: { entry: 28.00, average: 45.00, experienced: 72.00 },
+    },
+  ],
+
+  cleaning_services: [
+    {
+      id: 'janitor_cleaner',
+      title: 'Janitor / Cleaner',
+      soc: '37-2011',
+      description: 'Keep buildings in clean and orderly condition. Perform heavy cleaning duties such as cleaning floors, shampooing rugs, and washing walls.',
+      wages: { entry: 12.00, average: 15.65, experienced: 21.79 },
+    },
+    {
+      id: 'maid_housekeeping',
+      title: 'Maid / Housekeeping Cleaner',
+      soc: '37-2012',
+      description: 'Perform any combination of light cleaning duties to maintain private households or commercial establishments.',
+      wages: { entry: 11.98, average: 14.89, experienced: 19.98 },
+    },
+    {
+      id: 'cleaning_supervisor',
+      title: 'Cleaning Supervisor',
+      soc: '37-1011',
+      description: 'Directly supervise and coordinate work activities of janitors, maids, housekeeping cleaners, and window washers.',
+      wages: { entry: 17.09, average: 22.81, experienced: 32.36 },
+    },
+    {
+      id: 'cleaning_business_owner',
+      title: 'Cleaning Services Owner / Operator',
+      soc: '11-1021',
+      description: 'Own and operate a cleaning or janitorial services business. Manage client contracts, scheduling, and cleaning crews.',
+      wages: { entry: 25.00, average: 40.00, experienced: 65.00 },
+    },
+  ],
+
+  auto_repair: [
+    {
+      id: 'automotive_service_tech',
+      title: 'Automotive Service Technician',
+      soc: '49-3023',
+      description: 'Inspect, maintain, and repair automobiles, buses, and light trucks. Use diagnostic equipment and technical knowledge to fix problems.',
+      wages: { entry: 18.05, average: 23.72, experienced: 38.84 },
+    },
+    {
+      id: 'auto_body_repairer',
+      title: 'Auto Body / Collision Repairer',
+      soc: '49-3021',
+      description: 'Repair and refinish automotive vehicle bodies and straighten vehicle frames. Restore vehicles to original condition after damage.',
+      wages: { entry: 18.48, average: 25.13, experienced: 37.89 },
+    },
+    {
+      id: 'service_advisor',
+      title: 'Automotive Service Advisor',
+      soc: '41-3041',
+      description: 'Advise customers on automotive service needs, prepare work orders, and ensure customer satisfaction with repair results.',
+      wages: { entry: 18.00, average: 28.00, experienced: 45.00 },
+    },
+    {
+      id: 'auto_shop_owner',
+      title: 'Auto Repair Shop Owner / Operator',
+      soc: '11-1021',
+      description: 'Own and operate an automotive repair shop. Oversee technicians, manage customer relationships, and handle shop operations.',
+      wages: { entry: 30.00, average: 50.00, experienced: 82.00 },
+    },
+  ],
+
+  // ─── REAL ESTATE & PROPERTY ──────────────────────────────────────────────
+  property_management: [
+    {
+      id: 'property_manager',
+      title: 'Property Manager',
+      soc: '11-9141',
+      description: 'Plan, direct, or coordinate the selling, buying, leasing, or governance activities of commercial, industrial, or residential real estate properties.',
+      wages: { entry: 22.37, average: 33.55, experienced: 53.48 },
+    },
+    {
+      id: 'leasing_agent',
+      title: 'Leasing Agent / Consultant',
+      soc: '41-9021',
+      description: 'Rent properties to prospective tenants. Show properties, screen applicants, prepare lease agreements, and manage tenant relationships.',
+      wages: { entry: 16.00, average: 24.00, experienced: 38.00 },
+    },
+    {
+      id: 'hoa_manager',
+      title: 'HOA / Community Association Manager',
+      soc: '11-9141',
+      description: 'Manage the day-to-day operations of homeowner or condominium associations. Oversee maintenance, finances, and vendor contracts.',
+      wages: { entry: 22.00, average: 34.00, experienced: 55.00 },
+    },
+    {
+      id: 'maintenance_coordinator',
+      title: 'Maintenance Coordinator',
+      soc: '11-3012',
+      description: 'Coordinate maintenance and repair activities for managed properties. Liaise with tenants, vendors, and contractors.',
+      wages: { entry: 19.00, average: 28.00, experienced: 43.00 },
+    },
+  ],
+
+  // ─── FINANCIAL SERVICES ───────────────────────────────────────────────────
+  bookkeeping: [
+    {
+      id: 'bookkeeper',
+      title: 'Bookkeeper',
+      soc: '43-3031',
+      description: 'Compute, classify, and record numerical data to keep financial records complete. Perform any combination of routine calculating, posting, and verifying duties.',
+      wages: { entry: 17.27, average: 21.94, experienced: 29.97 },
+    },
+    {
+      id: 'full_charge_bookkeeper',
+      title: 'Full-Charge Bookkeeper',
+      soc: '43-3031',
+      description: 'Manage complete bookkeeping cycle through financial statement preparation. Oversee accounts payable, accounts receivable, payroll, and reconciliations.',
+      wages: { entry: 20.00, average: 27.00, experienced: 40.00 },
+    },
+    {
+      id: 'payroll_specialist',
+      title: 'Payroll Specialist',
+      soc: '43-3051',
+      description: 'Compile and process payroll data such as hours worked, taxes, and insurance to be withheld, and employee identification number.',
+      wages: { entry: 18.72, average: 25.60, experienced: 36.48 },
+    },
+    {
+      id: 'accounting_technician',
+      title: 'Accounting Technician',
+      soc: '13-2011',
+      description: 'Assist accountants and auditors in preparing financial reports, reconciling accounts, and maintaining ledgers.',
+      wages: { entry: 22.00, average: 32.00, experienced: 48.00 },
+    },
+  ],
+
+  mortgage_lending: [
+    {
+      id: 'mortgage_loan_officer',
+      title: 'Mortgage Loan Officer',
+      soc: '13-2072',
+      description: 'Evaluate, authorize, or recommend approval of commercial, real estate, or credit loans. Advise borrowers on financial status and methods of payments.',
+      wages: { entry: 21.50, average: 37.42, experienced: 68.06 },
+    },
+    {
+      id: 'mortgage_broker',
+      title: 'Mortgage Broker',
+      soc: '13-2072',
+      description: 'Act as an intermediary between borrowers and lenders. Source mortgage products, compare rates, and guide clients through the loan process.',
+      wages: { entry: 25.00, average: 45.00, experienced: 85.00 },
+    },
+    {
+      id: 'loan_processor',
+      title: 'Loan Processor',
+      soc: '43-4131',
+      description: 'Process mortgage applications, verify information, order appraisals, and coordinate with underwriters to ensure timely loan closings.',
+      wages: { entry: 18.00, average: 25.00, experienced: 38.00 },
+    },
+    {
+      id: 'loan_originator',
+      title: 'Mortgage Loan Originator',
+      soc: '13-2072',
+      description: 'Originate residential mortgage loans by developing referral networks, evaluating borrower qualifications, and structuring loan applications.',
+      wages: { entry: 28.00, average: 52.00, experienced: 100.00 },
+    },
+  ],
+
+  // ─── HEALTHCARE & WELLNESS ───────────────────────────────────────────────
+  optometry: [
+    {
+      id: 'optometrist',
+      title: 'Optometrist',
+      soc: '29-1041',
+      description: 'Diagnose, manage, and treat conditions and diseases of the human eye and visual system. Prescribe and fit corrective lenses.',
+      wages: { entry: 54.60, average: 65.12, experienced: 100.00 },
+    },
+    {
+      id: 'optician',
+      title: 'Optician / Dispensing Optician',
+      soc: '29-2081',
+      description: 'Design, measure, fit, and adapt lenses and frames for client according to written optical prescription or specification.',
+      wages: { entry: 16.68, average: 22.50, experienced: 32.21 },
+    },
+    {
+      id: 'ophthalmic_technician',
+      title: 'Ophthalmic Technician',
+      soc: '29-2057',
+      description: 'Assist ophthalmologists and optometrists by performing diagnostic tests and patient screenings.',
+      wages: { entry: 16.00, average: 21.00, experienced: 30.00 },
+    },
+    {
+      id: 'vision_therapy_tech',
+      title: 'Vision Therapy Technician',
+      soc: '29-2057',
+      description: 'Conduct vision therapy programs under supervision of optometrist to treat binocular vision disorders and visual processing issues.',
+      wages: { entry: 15.00, average: 20.00, experienced: 29.00 },
+    },
+  ],
+
+  pharmacy: [
+    {
+      id: 'pharmacist',
+      title: 'Pharmacist',
+      soc: '29-1051',
+      description: 'Dispense prescription medications and provide expertise in safe medication use. Counsel patients and answer questions about drug interactions and side effects.',
+      wages: { entry: 58.65, average: 66.22, experienced: 77.19 },
+    },
+    {
+      id: 'compounding_pharmacist',
+      title: 'Compounding Pharmacist',
+      soc: '29-1051',
+      description: 'Prepare customized medications by combining, mixing, or altering ingredients to meet specific patient needs not available commercially.',
+      wages: { entry: 60.00, average: 70.00, experienced: 82.00 },
+    },
+    {
+      id: 'pharmacy_technician',
+      title: 'Pharmacy Technician',
+      soc: '29-2052',
+      description: 'Prepare medications under the direction of pharmacists. May measure, mix, count, label, and record amounts and dosages.',
+      wages: { entry: 14.11, average: 18.37, experienced: 25.55 },
+    },
+    {
+      id: 'pharmacy_manager',
+      title: 'Pharmacy Manager / Director',
+      soc: '11-9111',
+      description: 'Manage the overall operations of the pharmacy including staff, inventory, compliance, and patient care services.',
+      wages: { entry: 60.00, average: 80.00, experienced: 110.00 },
+    },
+  ],
+
+  // ─── RETAIL, FOOD & LOGISTICS ────────────────────────────────────────────
+  ecommerce: [
+    {
+      id: 'ecommerce_manager',
+      title: 'E-Commerce Manager',
+      soc: '11-2021',
+      description: 'Manage online sales channels including website, marketplace listings, digital advertising, and fulfillment operations.',
+      wages: { entry: 28.00, average: 45.00, experienced: 72.00 },
+    },
+    {
+      id: 'online_merchandise_buyer',
+      title: 'Online Merchandise Buyer / Sourcing Manager',
+      soc: '13-1022',
+      description: 'Source, evaluate, and purchase merchandise for online retail. Manage supplier relationships and negotiate pricing and terms.',
+      wages: { entry: 22.00, average: 34.00, experienced: 54.00 },
+    },
+    {
+      id: 'fulfillment_operations_mgr',
+      title: 'Fulfillment / Operations Manager',
+      soc: '11-1021',
+      description: 'Oversee order fulfillment, warehouse operations, inventory management, and shipping processes for e-commerce business.',
+      wages: { entry: 25.00, average: 42.00, experienced: 68.00 },
+    },
+    {
+      id: 'digital_marketing_specialist',
+      title: 'Digital Marketing Specialist',
+      soc: '13-1161',
+      description: 'Plan and execute digital marketing campaigns across email, social media, search, and display advertising channels.',
+      wages: { entry: 20.97, average: 33.08, experienced: 51.84 },
+    },
+    {
+      id: 'ecommerce_owner',
+      title: 'E-Commerce Business Owner',
+      soc: '11-1021',
+      description: 'Own and operate an online retail business. Manage product sourcing, digital marketing, customer service, and logistics.',
+      wages: { entry: 28.00, average: 48.00, experienced: 80.00 },
+    },
+  ],
+
+  trucking: [
+    {
+      id: 'truck_driver_heavy',
+      title: 'Truck Driver (Heavy/Tractor-Trailer)',
+      soc: '53-3032',
+      description: 'Drive a tractor-trailer or tanker truck to transport freight and other materials over long distances.',
+      wages: { entry: 20.85, average: 25.28, experienced: 37.17 },
+    },
+    {
+      id: 'dispatcher',
+      title: 'Transportation Dispatcher',
+      soc: '43-5032',
+      description: 'Schedule and dispatch workers, equipment, or service vehicles to appropriate locations. Relay work orders or messages.',
+      wages: { entry: 16.64, average: 22.88, experienced: 33.76 },
+    },
+    {
+      id: 'freight_broker',
+      title: 'Freight Broker',
+      soc: '11-3071',
+      description: 'Arrange transportation of goods by connecting shippers with carriers. Negotiate rates, coordinate logistics, and manage shipping documentation.',
+      wages: { entry: 25.00, average: 40.00, experienced: 65.00 },
+    },
+    {
+      id: 'trucking_owner_operator',
+      title: 'Trucking Owner-Operator',
+      soc: '53-3032',
+      description: 'Own and operate a commercial trucking business. Drive routes, manage fuel and maintenance costs, and handle client accounts.',
+      wages: { entry: 28.00, average: 45.00, experienced: 75.00 },
+    },
+  ],
+
+  // ─── PERSONAL SERVICES & EDUCATION ───────────────────────────────────────
+  salon_spa: [
+    {
+      id: 'hairdresser_cosmetologist',
+      title: 'Hairdresser / Cosmetologist',
+      soc: '39-5012',
+      description: 'Provide beauty services such as shampooing, cutting, coloring, and styling hair. May also apply makeup and perform skin care treatments.',
+      wages: { entry: 12.06, average: 16.07, experienced: 26.32 },
+    },
+    {
+      id: 'barber',
+      title: 'Barber',
+      soc: '39-5011',
+      description: 'Cut, trim, and groom hair for male clients. May also shave and trim beards, and provide scalp treatments.',
+      wages: { entry: 12.00, average: 16.29, experienced: 26.60 },
+    },
+    {
+      id: 'esthetician',
+      title: 'Esthetician / Skin Care Specialist',
+      soc: '39-5094',
+      description: 'Cleanse and beautify the face and body to enhance a client's appearance through treatments such as facials, waxing, and exfoliation.',
+      wages: { entry: 12.63, average: 18.84, experienced: 31.22 },
+    },
+    {
+      id: 'nail_technician',
+      title: 'Nail Technician / Manicurist',
+      soc: '39-5092',
+      description: 'Clean and shape customers' nails, and apply polish. May also perform nail art, nail extensions, and hand/foot treatments.',
+      wages: { entry: 11.78, average: 15.46, experienced: 22.50 },
+    },
+    {
+      id: 'massage_therapist',
+      title: 'Massage Therapist',
+      soc: '31-9011',
+      description: 'Assess soft tissue and joint dysfunction to determine the best technique to alleviate pain and improve function. Apply pressure to muscles and soft tissue.',
+      wages: { entry: 16.89, average: 26.03, experienced: 44.22 },
+    },
+    {
+      id: 'salon_owner',
+      title: 'Salon / Spa Owner',
+      soc: '11-1021',
+      description: 'Own and manage a salon, barbershop, or spa. Oversee staff, client experience, booking, inventory, and business development.',
+      wages: { entry: 22.00, average: 38.00, experienced: 62.00 },
+    },
+  ],
+
+  fitness: [
+    {
+      id: 'personal_trainer',
+      title: 'Personal Trainer',
+      soc: '39-9031',
+      description: 'Instruct or coach groups or individuals in exercise activities. Demonstrate activities, observe clients, explain instructions, and motivate participants.',
+      wages: { entry: 13.30, average: 22.01, experienced: 38.39 },
+    },
+    {
+      id: 'group_fitness_instructor',
+      title: 'Group Fitness Instructor',
+      soc: '39-9031',
+      description: 'Lead group fitness classes such as yoga, aerobics, cycling, or strength training. Design class programming and motivate participants.',
+      wages: { entry: 13.00, average: 20.00, experienced: 34.00 },
+    },
+    {
+      id: 'yoga_pilates_instructor',
+      title: 'Yoga / Pilates Instructor',
+      soc: '39-9031',
+      description: 'Teach yoga, Pilates, or mindfulness practices to individuals or groups. Design sequences, demonstrate poses, and offer modifications.',
+      wages: { entry: 14.00, average: 22.50, experienced: 38.00 },
+    },
+    {
+      id: 'fitness_studio_owner',
+      title: 'Fitness Studio Owner / Director',
+      soc: '11-1021',
+      description: 'Own and operate a fitness studio, gym, or health coaching business. Manage trainers, class schedules, memberships, and marketing.',
+      wages: { entry: 25.00, average: 42.00, experienced: 70.00 },
+    },
+  ],
+
+  event_planning: [
+    {
+      id: 'event_planner',
+      title: 'Meeting / Event Planner',
+      soc: '13-1121',
+      description: 'Coordinate activities of staff and convention personnel to make arrangements for group meetings and conventions.',
+      wages: { entry: 19.19, average: 27.43, experienced: 42.64 },
+    },
+    {
+      id: 'wedding_planner',
+      title: 'Wedding Planner / Coordinator',
+      soc: '13-1121',
+      description: 'Plan and coordinate all aspects of wedding ceremonies and receptions including venue, catering, vendors, and logistics.',
+      wages: { entry: 18.00, average: 26.00, experienced: 40.00 },
+    },
+    {
+      id: 'event_producer',
+      title: 'Event Producer',
+      soc: '13-1121',
+      description: 'Produce and manage large-scale corporate or entertainment events. Oversee production teams, budgets, timelines, and vendor relationships.',
+      wages: { entry: 22.00, average: 35.00, experienced: 58.00 },
+    },
+    {
+      id: 'event_business_owner',
+      title: 'Event Planning Business Owner',
+      soc: '11-1021',
+      description: 'Own and operate an event planning or coordination business. Manage client relationships, vendor contracts, and event logistics.',
+      wages: { entry: 25.00, average: 42.00, experienced: 70.00 },
+    },
+  ],
+
+  childcare_education: [
+    {
+      id: 'childcare_director',
+      title: 'Childcare / Daycare Director',
+      soc: '11-9031',
+      description: 'Plan, direct, or coordinate the academic and nonacademic activities of preschool and childcare centers or programs.',
+      wages: { entry: 17.91, average: 24.51, experienced: 37.45 },
+    },
+    {
+      id: 'preschool_teacher',
+      title: 'Preschool / Daycare Teacher',
+      soc: '25-2011',
+      description: 'Teach and care for children from infancy through age 5 who have not yet entered kindergarten. Develop lesson plans and age-appropriate activities.',
+      wages: { entry: 11.78, average: 16.82, experienced: 24.77 },
+    },
+    {
+      id: 'tutor',
+      title: 'Private Tutor / Academic Coach',
+      soc: '25-3031',
+      description: 'Provide individualized instruction in academic subjects. Assess student needs, develop study plans, and monitor progress.',
+      wages: { entry: 14.00, average: 22.00, experienced: 38.00 },
+    },
+    {
+      id: 'education_program_director',
+      title: 'Education Program Director',
+      soc: '11-9032',
+      description: 'Plan, direct, and administer educational programs. Develop curriculum, manage staff, and ensure regulatory compliance.',
+      wages: { entry: 28.00, average: 44.00, experienced: 70.00 },
+    },
+  ],
+
+  // ─── PROFESSIONAL & LEGAL ─────────────────────────────────────────────────
+  photography_creative: [
+    {
+      id: 'photographer',
+      title: 'Photographer',
+      soc: '27-4021',
+      description: 'Photograph subjects or newsworthy events using digital or film cameras and equipment. May specialize in commercial, portrait, or editorial work.',
+      wages: { entry: 13.83, average: 21.02, experienced: 37.30 },
+    },
+    {
+      id: 'videographer',
+      title: 'Videographer / Video Producer',
+      soc: '27-4032',
+      description: 'Photograph or video-record corporate events, ceremonies, interviews, or other subjects. Edit footage for final delivery.',
+      wages: { entry: 15.00, average: 25.00, experienced: 45.00 },
+    },
+    {
+      id: 'graphic_designer',
+      title: 'Graphic Designer',
+      soc: '27-1024',
+      description: 'Design or create graphics to meet specific commercial or promotional needs. May use a variety of mediums to achieve artistic or decorative effects.',
+      wages: { entry: 17.69, average: 26.57, experienced: 41.00 },
+    },
+    {
+      id: 'creative_director',
+      title: 'Creative Director / Art Director',
+      soc: '27-1011',
+      description: 'Formulate design concepts and presentation approaches for visual communications including websites, advertising, and branding materials.',
+      wages: { entry: 31.96, average: 53.36, experienced: 86.94 },
+    },
+    {
+      id: 'photo_video_business_owner',
+      title: 'Photography / Videography Business Owner',
+      soc: '11-1021',
+      description: 'Own and operate a photography or videography business. Manage client bookings, post-production, equipment, and marketing.',
+      wages: { entry: 22.00, average: 38.00, experienced: 65.00 },
+    },
+  ],
+
   other: [
     {
       id: 'general_manager_other',

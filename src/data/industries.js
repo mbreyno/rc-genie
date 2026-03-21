@@ -124,6 +124,125 @@ export const INDUSTRIES = [
     description: 'Management consulting, business advisory, strategy, and specialized professional services',
     defaultMyBusinessPct: 60,
   },
+  // ─── Trades & Construction ───────────────────────────────────────────────
+  {
+    id: 'trades',
+    label: 'Plumbing, HVAC & Electrical',
+    icon: '🔧',
+    description: 'Plumbing, heating/cooling, electrical contracting, and skilled trade services',
+    defaultMyBusinessPct: 65,
+  },
+  {
+    id: 'landscaping',
+    label: 'Landscaping / Lawn Care',
+    icon: '🌿',
+    description: 'Lawn maintenance, landscaping design, irrigation, and outdoor property services',
+    defaultMyBusinessPct: 60,
+  },
+  {
+    id: 'cleaning_services',
+    label: 'Cleaning / Janitorial Services',
+    icon: '🧹',
+    description: 'Residential and commercial cleaning, maid services, and janitorial contracts',
+    defaultMyBusinessPct: 65,
+  },
+  {
+    id: 'auto_repair',
+    label: 'Auto Repair / Mechanic Shop',
+    icon: '🚗',
+    description: 'General auto repair, collision, body work, specialty auto services, and detailing',
+    defaultMyBusinessPct: 65,
+  },
+  // ─── Real Estate & Property ──────────────────────────────────────────────
+  {
+    id: 'property_management',
+    label: 'Property Management',
+    icon: '🏠',
+    description: 'Residential and commercial property management, HOA management, and leasing',
+    defaultMyBusinessPct: 60,
+  },
+  // ─── Financial Services ──────────────────────────────────────────────────
+  {
+    id: 'bookkeeping',
+    label: 'Bookkeeping Services',
+    icon: '📒',
+    description: 'Full-charge bookkeeping, payroll processing, and QuickBooks/accounting services',
+    defaultMyBusinessPct: 70,
+  },
+  {
+    id: 'mortgage_lending',
+    label: 'Mortgage / Lending',
+    icon: '🏦',
+    description: 'Mortgage origination, loan brokerage, and residential or commercial lending',
+    defaultMyBusinessPct: 65,
+  },
+  // ─── Healthcare & Wellness ───────────────────────────────────────────────
+  {
+    id: 'optometry',
+    label: 'Optometry / Vision Care',
+    icon: '👁️',
+    description: 'Vision exams, corrective lenses, contact fittings, and ocular health care',
+    defaultMyBusinessPct: 65,
+  },
+  {
+    id: 'pharmacy',
+    label: 'Pharmacy / Compounding',
+    icon: '💊',
+    description: 'Independent retail pharmacy, compounding pharmacy, and pharmaceutical services',
+    defaultMyBusinessPct: 65,
+  },
+  // ─── Retail, Food & Logistics ────────────────────────────────────────────
+  {
+    id: 'ecommerce',
+    label: 'E-Commerce / Online Retail',
+    icon: '🛒',
+    description: 'Online retail, Amazon/eBay selling, dropshipping, and direct-to-consumer brands',
+    defaultMyBusinessPct: 55,
+  },
+  {
+    id: 'trucking',
+    label: 'Trucking / Freight / Logistics',
+    icon: '🚛',
+    description: 'Commercial trucking, freight brokerage, courier services, and logistics operations',
+    defaultMyBusinessPct: 60,
+  },
+  // ─── Personal Services & Education ───────────────────────────────────────
+  {
+    id: 'salon_spa',
+    label: 'Salon / Barber / Spa',
+    icon: '✂️',
+    description: 'Hair salons, barbershops, nail salons, day spas, and personal grooming services',
+    defaultMyBusinessPct: 70,
+  },
+  {
+    id: 'fitness',
+    label: 'Fitness / Personal Training',
+    icon: '💪',
+    description: 'Personal training, gyms, yoga/Pilates studios, and health coaching services',
+    defaultMyBusinessPct: 70,
+  },
+  {
+    id: 'event_planning',
+    label: 'Event Planning',
+    icon: '🎉',
+    description: 'Corporate events, weddings, parties, conferences, and meeting planning services',
+    defaultMyBusinessPct: 65,
+  },
+  {
+    id: 'childcare_education',
+    label: 'Childcare / Tutoring / Education',
+    icon: '🎓',
+    description: 'Daycare centers, after-school programs, private tutoring, and educational services',
+    defaultMyBusinessPct: 65,
+  },
+  // ─── Professional & Legal ────────────────────────────────────────────────
+  {
+    id: 'photography_creative',
+    label: 'Photography / Videography / Creative',
+    icon: '📷',
+    description: 'Commercial and portrait photography, videography, graphic design, and creative services',
+    defaultMyBusinessPct: 70,
+  },
   {
     id: 'other',
     label: 'Other / General Business',
@@ -153,6 +272,30 @@ export const DEFAULT_ALLOCATIONS = {
   retail:                 { marketing: 15, finance: 10, hr: 10, management: 10, myBusiness: 55 },
   insurance:              { marketing: 15, finance: 10, hr: 5,  management: 10, myBusiness: 60 },
   consulting:             { marketing: 10, finance: 10, hr: 10, management: 10, myBusiness: 60 },
+  // Trades & Construction
+  trades:                 { marketing: 10, finance: 5,  hr: 5,  management: 15, myBusiness: 65 },
+  landscaping:            { marketing: 10, finance: 5,  hr: 10, management: 15, myBusiness: 60 },
+  cleaning_services:      { marketing: 10, finance: 5,  hr: 10, management: 10, myBusiness: 65 },
+  auto_repair:            { marketing: 5,  finance: 5,  hr: 5,  management: 20, myBusiness: 65 },
+  // Real Estate & Property
+  property_management:    { marketing: 10, finance: 10, hr: 5,  management: 15, myBusiness: 60 },
+  // Financial Services
+  bookkeeping:            { marketing: 5,  finance: 15, hr: 5,  management: 5,  myBusiness: 70 },
+  mortgage_lending:       { marketing: 15, finance: 10, hr: 5,  management: 5,  myBusiness: 65 },
+  // Healthcare & Wellness
+  optometry:              { marketing: 5,  finance: 10, hr: 10, management: 10, myBusiness: 65 },
+  pharmacy:               { marketing: 5,  finance: 10, hr: 10, management: 10, myBusiness: 65 },
+  // Retail, Food & Logistics
+  ecommerce:              { marketing: 20, finance: 10, hr: 5,  management: 10, myBusiness: 55 },
+  trucking:               { marketing: 5,  finance: 10, hr: 5,  management: 20, myBusiness: 60 },
+  // Personal Services & Education
+  salon_spa:              { marketing: 10, finance: 5,  hr: 5,  management: 10, myBusiness: 70 },
+  fitness:                { marketing: 10, finance: 5,  hr: 5,  management: 10, myBusiness: 70 },
+  event_planning:         { marketing: 15, finance: 5,  hr: 5,  management: 10, myBusiness: 65 },
+  childcare_education:    { marketing: 5,  finance: 5,  hr: 15, management: 10, myBusiness: 65 },
+  // Professional & Legal
+  photography_creative:   { marketing: 15, finance: 5,  hr: 5,  management: 5,  myBusiness: 70 },
+  // General
   other:                  { marketing: 15, finance: 10, hr: 10, management: 15, myBusiness: 50 },
 };
 
