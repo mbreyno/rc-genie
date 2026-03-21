@@ -158,11 +158,11 @@ export default function Landing() {
             </div>
             <div className="space-y-2.5">
               {[
-                { label: 'Marketing & Sales',       pct: 35, color: 'bg-brand-500' },
-                { label: 'Management & Operations', pct: 25, color: 'bg-brand-400' },
-                { label: 'Finance & Accounting',    pct: 20, color: 'bg-brand-300' },
-                { label: 'Human Resources',         pct: 12, color: 'bg-blue-300'  },
-                { label: 'My Business Tasks',       pct: 8,  color: 'bg-slate-300' },
+                { label: 'My Business Tasks',       pct: 55, color: 'bg-brand-500' },
+                { label: 'Management & Operations', pct: 20, color: 'bg-brand-400' },
+                { label: 'Marketing & Sales',       pct: 13, color: 'bg-brand-300' },
+                { label: 'Finance & Accounting',    pct: 7,  color: 'bg-blue-300'  },
+                { label: 'Human Resources',         pct: 5,  color: 'bg-slate-300' },
               ].map(row => (
                 <div key={row.label} className="flex items-center gap-3">
                   <p className="text-xs text-gray-500 w-44 shrink-0">{row.label}</p>
