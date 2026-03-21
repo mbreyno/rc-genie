@@ -405,9 +405,9 @@ export const INDUSTRY_OCCUPATIONS = {
     },
     {
       id: 'financial_advisor_cpa',
-      title: 'Personal Financial Advisor',
+      title: 'CPA with Financial Advisory Services',
       soc: '13-2052',
-      description: 'Advise clients on financial plans using knowledge of tax and investment strategies, securities, insurance, pension plans, and real estate.',
+      description: 'CPA who also provides integrated financial planning, investment guidance, and wealth management advice alongside tax and accounting services. (For a dedicated financial planning firm, select that industry instead.)',
       wages: { entry: 26.82, average: 46.50, experienced: 80.02 },
     },
     {
