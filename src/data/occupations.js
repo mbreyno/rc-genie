@@ -131,7 +131,7 @@ export const FINANCE_OCCUPATIONS = [
     id: 'payroll_clerk',
     title: 'Payroll Clerk',
     soc: '43-3051',
-    description: 'Compile and record employee time and payroll data. May compute employees\' time worked, production, and commission. May compute and post wages and deductions.',
+    description: "Compile and record employee time and payroll data. May compute employees\' time worked, production, and commission. May compute and post wages and deductions.",
     wages: { entry: 18.92, average: 25.84, experienced: 35.11 },
   },
   {
@@ -310,7 +310,7 @@ export const INDUSTRY_OCCUPATIONS = {
       id: 'personal_financial_advisor',
       title: 'Personal Financial Advisor',
       soc: '13-2052',
-      description: 'Advise clients on financial plans and strategies. Assess clients\' financial situations and recommend investments, insurance, and tax planning approaches.',
+      description: "Advise clients on financial plans and strategies. Assess clients\' financial situations and recommend investments, insurance, and tax planning approaches.",
       wages: { entry: 26.82, average: 46.50, experienced: 80.02 },
     },
     {
@@ -1272,14 +1272,14 @@ export const INDUSTRY_OCCUPATIONS = {
       id: 'esthetician',
       title: 'Esthetician / Skin Care Specialist',
       soc: '39-5094',
-      description: 'Cleanse and beautify the face and body to enhance a client's appearance through treatments such as facials, waxing, and exfoliation.',
+      description: "Cleanse and beautify the face and body to enhance a client's appearance through treatments such as facials, waxing, and exfoliation.",
       wages: { entry: 12.63, average: 18.84, experienced: 31.22 },
     },
     {
       id: 'nail_technician',
       title: 'Nail Technician / Manicurist',
       soc: '39-5092',
-      description: 'Clean and shape customers' nails, and apply polish. May also perform nail art, nail extensions, and hand/foot treatments.',
+      description: "Clean and shape customers' nails, and apply polish. May also perform nail art, nail extensions, and hand/foot treatments.",
       wages: { entry: 11.78, average: 15.46, experienced: 22.50 },
     },
     {
