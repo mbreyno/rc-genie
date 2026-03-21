@@ -52,6 +52,7 @@ export default function Login() {
               <span>
                 <strong>Check your email.</strong> We sent you a confirmation link.
                 Click it to activate your account, then sign in here.
+                If you don't see it, check your spam folder.
               </span>
             </div>
           )}
