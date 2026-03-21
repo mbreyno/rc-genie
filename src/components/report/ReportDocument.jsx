@@ -32,7 +32,7 @@ function Page({ children, logoUrl, firmName, clientName, companyName, reportYear
       display: 'flex',
       flexDirection: 'column',
       backgroundColor: 'white',
-      fontFamily: 'Arial, Helvetica, sans-serif',
+      fontFamily: 'Verdana, Geneva, sans-serif',
       fontSize: '11px',
       color: '#1a1a1a',
       // No pageBreak properties — exact height handles natural PDF pagination
@@ -131,7 +131,7 @@ function DonutCanvas({ segments, size = 160 }) {
         const midA = startAngle + angle / 2
         const lr   = (outerR + innerR) / 2
         ctx.fillStyle    = 'white'
-        ctx.font         = `bold ${Math.round(size * 0.065)}px Arial`
+        ctx.font         = `bold ${Math.round(size * 0.065)}px Verdana`
         ctx.textAlign    = 'center'
         ctx.textBaseline = 'middle'
         ctx.fillText(`${pct}%`, cx + lr * Math.cos(midA), cy + lr * Math.sin(midA))
