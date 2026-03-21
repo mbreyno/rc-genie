@@ -68,6 +68,13 @@ export const MARKETING_OCCUPATIONS = [
     wages: { entry: 29.77, average: 50.51, experienced: 82.56 },
   },
   {
+    id: 'marketing_coordinator',
+    title: 'Marketing Coordinator',
+    soc: '13-1161',
+    description: 'Support marketing campaigns and promotions by coordinating schedules, maintaining content calendars, tracking metrics, and assisting with social media and email marketing.',
+    wages: { entry: 16.50, average: 22.84, experienced: 33.00 },
+  },
+  {
     id: 'marketing_manager',
     title: 'Marketing Manager',
     soc: '11-2021',
