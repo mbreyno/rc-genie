@@ -169,8 +169,12 @@ function ChartWithLegend({ title, segments }) {
   )
 }
 
+// How many task categories to show per breakdown page.
+// 3 fills pages nicely for typical reports (1–3 tasks per category).
+const CATS_PER_PAGE = 3
+
 // ─── Page 1: Cover / Summary ─────────────────────────────────────────────────
-function Page1({ report, advisor, totalCompensation, categoryTotals }) {
+function Page1({ report, advisor, totalCompensation, categoryTotals, totalPages }) {
   const timeSegments = CATEGORY_ORDER
     .filter(id => categoryTotals[id])
     .map(id => ({ label: CATEGORIES[id].label, value: categoryTotals[id].pctOfTotal, color: CATEGORIES[id].color }))
@@ -179,12 +183,15 @@ function Page1({ report, advisor, totalCompensation, categoryTotals }) {
     .filter(id => categoryTotals[id])
     .map(id => ({ label: CATEGORIES[id].label, value: categoryTotals[id].pctOfCompensation, color: CATEGORIES[id].color }))
 
+  const dateStr = new Date().toISOString().split('T')[0]
+  const location = report.msa_name ? `${report.msa_name}, ${report.state_name}` : report.state_name
+
   const pageProps = {
     ...advisor,
     clientName: `${report.client_first_name} ${report.client_last_name}`,
     companyName: report.company_name,
     reportYear: report.report_year,
-    pageNum: 1, totalPages: 9,
+    pageNum: 1, totalPages,
   }
 
   return (
@@ -212,17 +219,16 @@ function Page1({ report, advisor, totalCompensation, categoryTotals }) {
         to be Reasonable Compensation based on the type of work performed, the skill level of the
         work performed and the number of hours the work is performed annually. You told us that you
         work <strong>{report.hours_worked.toLocaleString()}</strong> hours per year in{' '}
-        <strong>{report.msa_name ? `${report.msa_name}, ` : ''}{report.state_name}</strong>. Our
-        analysis indicates the annual salary of{' '}
+        <strong>{location}</strong>. Our analysis indicates the annual salary of{' '}
         <strong>{formatCurrency(totalCompensation)}</strong> would be a reasonable cost to hire
         employee(s) to perform the duties and responsibilities that you currently perform.
       </p>
-      <p style={{ lineHeight: 1.65, marginBottom: '28px' }}>
+      <p style={{ lineHeight: 1.65, marginBottom: '20px' }}>
         {advisor.firmName} recommends completing a Reasonable Compensation report annually.
       </p>
 
       {/* Charts — table layout avoids the flex/SVG clipping issue in html2pdf */}
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
         <tbody>
           <tr>
             <td style={{ width: '50%', textAlign: 'center', verticalAlign: 'top', padding: '0 16px 0 0' }}>
@@ -234,12 +240,42 @@ function Page1({ report, advisor, totalCompensation, categoryTotals }) {
           </tr>
         </tbody>
       </table>
+
+      {/* Business Summary — compact info row below charts */}
+      <div style={{
+        borderTop: '1px solid #e5e7eb',
+        paddingTop: '14px',
+        backgroundColor: BRAND_XL,
+        borderRadius: '6px',
+        padding: '12px 16px',
+        marginTop: '4px',
+      }}>
+        <div style={{ fontSize: '10px', fontWeight: 700, color: BRAND, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Report Details
+        </div>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10.5px' }}>
+          <tbody>
+            <tr>
+              <td style={{ padding: '2px 0', width: '50%' }}><span style={{ color: '#6b7280' }}>Client: </span><strong>{report.client_first_name} {report.client_last_name}</strong></td>
+              <td style={{ padding: '2px 0', width: '50%' }}><span style={{ color: '#6b7280' }}>Company: </span><strong>{report.company_name}</strong></td>
+            </tr>
+            <tr>
+              <td style={{ padding: '2px 0' }}><span style={{ color: '#6b7280' }}>Location: </span><strong>{location}</strong></td>
+              <td style={{ padding: '2px 0' }}><span style={{ color: '#6b7280' }}>Hours Worked: </span><strong>{report.hours_worked.toLocaleString()}</strong></td>
+            </tr>
+            <tr>
+              <td style={{ padding: '2px 0' }}><span style={{ color: '#6b7280' }}>Report Year: </span><strong>{report.report_year}</strong></td>
+              <td style={{ padding: '2px 0' }}><span style={{ color: '#6b7280' }}>Report Finalized: </span><strong>{dateStr}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </Page>
   )
 }
 
-// ─── Pages 2–3: Task Breakdowns ──────────────────────────────────────────────
-function TaskBreakdownPages({ report, advisor, tasks, categoryTotals, startPage }) {
+// ─── Pages 2+: Task Breakdowns ───────────────────────────────────────────────
+function TaskBreakdownPages({ report, advisor, tasks, categoryTotals, startPage, totalPages }) {
   const tasksByCategory = {}
   for (const task of tasks) {
     if (!tasksByCategory[task.categoryId]) tasksByCategory[task.categoryId] = []
@@ -251,12 +287,12 @@ function TaskBreakdownPages({ report, advisor, tasks, categoryTotals, startPage 
     clientName: `${report.client_first_name} ${report.client_last_name}`,
     companyName: report.company_name,
     reportYear: report.report_year,
-    totalPages: 9,
+    totalPages,
   }
 
   const catList = CATEGORY_ORDER.filter(id => tasksByCategory[id])
   const pages = []
-  for (let i = 0; i < catList.length; i += 2) pages.push(catList.slice(i, i + 2))
+  for (let i = 0; i < catList.length; i += CATS_PER_PAGE) pages.push(catList.slice(i, i + CATS_PER_PAGE))
 
   return pages.map((catIds, pageIdx) => (
     <Page key={pageIdx} {...pageProps} pageNum={startPage + pageIdx}>
@@ -309,39 +345,14 @@ function TaskBreakdownPages({ report, advisor, tasks, categoryTotals, startPage 
   ))
 }
 
-// ─── Page 4: Business Summary ────────────────────────────────────────────────
-function Page4BusinessSummary({ report, advisor }) {
+// ─── Methodology ─────────────────────────────────────────────────────────────
+function Page5Methodology({ report, advisor, pageNum, totalPages }) {
   const pageProps = {
     ...advisor,
     clientName: `${report.client_first_name} ${report.client_last_name}`,
     companyName: report.company_name,
     reportYear: report.report_year,
-    pageNum: 4, totalPages: 9,
-  }
-  const dateStr = new Date().toISOString().split('T')[0]
-  return (
-    <Page {...pageProps}>
-      <p style={{ fontWeight: 700, fontSize: '13px', marginBottom: '16px' }}>Business Summary:</p>
-      <div style={{ lineHeight: 2.0, fontSize: '11px' }}>
-        <div>Calculated For: {report.client_first_name} {report.client_last_name}</div>
-        <div>Company: {report.company_name}</div>
-        <div>Report Year: {report.report_year}</div>
-        <div>Location: {report.msa_name ? `${report.msa_name}, ` : ''}{report.state_name}</div>
-        <div>Hours Worked: {report.hours_worked.toLocaleString()}</div>
-        <div>Report Finalized: {dateStr}</div>
-      </div>
-    </Page>
-  )
-}
-
-// ─── Page 5: Methodology ─────────────────────────────────────────────────────
-function Page5Methodology({ report, advisor }) {
-  const pageProps = {
-    ...advisor,
-    clientName: `${report.client_first_name} ${report.client_last_name}`,
-    companyName: report.company_name,
-    reportYear: report.report_year,
-    pageNum: 5, totalPages: 9,
+    pageNum, totalPages,
   }
   return (
     <Page {...pageProps}>
@@ -397,14 +408,14 @@ function Page5Methodology({ report, advisor }) {
   )
 }
 
-// ─── Page 6: Other Considerations ───────────────────────────────────────────
-function Page6Considerations({ report, advisor }) {
+// ─── Other Considerations ────────────────────────────────────────────────────
+function Page6Considerations({ report, advisor, pageNum, totalPages }) {
   const pageProps = {
     ...advisor,
     clientName: `${report.client_first_name} ${report.client_last_name}`,
     companyName: report.company_name,
     reportYear: report.report_year,
-    pageNum: 6, totalPages: 9,
+    pageNum, totalPages,
   }
   return (
     <Page {...pageProps}>
@@ -449,14 +460,14 @@ function Page6Considerations({ report, advisor }) {
   )
 }
 
-// ─── Pages 7–8: Task Descriptions ───────────────────────────────────────────
-function TaskDescriptionPages({ report, advisor, tasks }) {
+// ─── Task Descriptions ───────────────────────────────────────────────────────
+function TaskDescriptionPages({ report, advisor, tasks, startPage, totalPages }) {
   const pageProps = {
     ...advisor,
     clientName: `${report.client_first_name} ${report.client_last_name}`,
     companyName: report.company_name,
     reportYear: report.report_year,
-    totalPages: 9,
+    totalPages,
   }
 
   const unique = []
@@ -468,7 +479,7 @@ function TaskDescriptionPages({ report, advisor, tasks }) {
   const pages = [unique.slice(0, half), unique.slice(half)]
 
   return pages.map((pageTasks, i) => (
-    <Page key={i} {...pageProps} pageNum={7 + i}>
+    <Page key={i} {...pageProps} pageNum={startPage + i}>
       {i === 0 && (
         <p style={{ fontWeight: 700, fontSize: '13px', marginBottom: '16px' }}>
           Appendix A — Descriptions of Tasks Selected
@@ -488,14 +499,14 @@ function TaskDescriptionPages({ report, advisor, tasks }) {
   ))
 }
 
-// ─── Page 9: Corporate Minutes ───────────────────────────────────────────────
-function Page9Minutes({ report, advisor, totalCompensation }) {
+// ─── Corporate Minutes ───────────────────────────────────────────────────────
+function Page9Minutes({ report, advisor, totalCompensation, pageNum, totalPages }) {
   const pageProps = {
     ...advisor,
     clientName: `${report.client_first_name} ${report.client_last_name}`,
     companyName: report.company_name,
     reportYear: report.report_year,
-    pageNum: 9, totalPages: 9,
+    pageNum, totalPages,
   }
   return (
     <Page {...pageProps}>
@@ -552,21 +563,44 @@ export default function ReportDocument({ report, advisorProfile, tasks, totalCom
     advisorName: advisorProfile?.advisor_name ?? 'Your Advisor',
   }
 
+  // Compute dynamic page numbers based on how many task breakdown pages there are.
+  // With CATS_PER_PAGE=3 and 5 categories: numTaskPages=2 → 8 pages total.
+  const activeCats = CATEGORY_ORDER.filter(id => categoryTotals[id])
+  const numTaskPages  = Math.ceil(activeCats.length / CATS_PER_PAGE)
+  const methodPage    = 2 + numTaskPages   // Methodology
+  const considPage    = methodPage + 1     // Considerations
+  const descStartPage = considPage + 1     // Task Descriptions (2 pages)
+  const minutesPage   = descStartPage + 2  // Corporate Minutes
+  const totalPages    = minutesPage
+
   return (
     <div id="report-document" style={{ backgroundColor: '#f3f4f6' }}>
       <Page1
         report={report} advisor={advisor}
         totalCompensation={totalCompensation} categoryTotals={categoryTotals}
+        totalPages={totalPages}
       />
       <TaskBreakdownPages
         report={report} advisor={advisor}
-        tasks={tasks} categoryTotals={categoryTotals} startPage={2}
+        tasks={tasks} categoryTotals={categoryTotals}
+        startPage={2} totalPages={totalPages}
       />
-      <Page4BusinessSummary report={report} advisor={advisor} />
-      <Page5Methodology     report={report} advisor={advisor} />
-      <Page6Considerations  report={report} advisor={advisor} />
-      <TaskDescriptionPages report={report} advisor={advisor} tasks={tasks} />
-      <Page9Minutes         report={report} advisor={advisor} totalCompensation={totalCompensation} />
+      <Page5Methodology
+        report={report} advisor={advisor}
+        pageNum={methodPage} totalPages={totalPages}
+      />
+      <Page6Considerations
+        report={report} advisor={advisor}
+        pageNum={considPage} totalPages={totalPages}
+      />
+      <TaskDescriptionPages
+        report={report} advisor={advisor} tasks={tasks}
+        startPage={descStartPage} totalPages={totalPages}
+      />
+      <Page9Minutes
+        report={report} advisor={advisor} totalCompensation={totalCompensation}
+        pageNum={minutesPage} totalPages={totalPages}
+      />
     </div>
   )
 }
