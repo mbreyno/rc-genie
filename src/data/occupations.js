@@ -82,6 +82,13 @@ export const MARKETING_OCCUPATIONS = [
     wages: { entry: 39.94, average: 64.32, experienced: 100.00 },
   },
   {
+    id: 'sales_manager',
+    title: 'Sales Manager',
+    soc: '11-2022',
+    description: "Direct and oversee an organization's sales policies, objectives, and initiatives. Set short- and long-term sales strategies, evaluate effectiveness, and supervise sales staff.",
+    wages: { entry: 43.25, average: 72.68, experienced: 116.50 },
+  },
+  {
     id: 'advertising_promotions_manager',
     title: 'Advertising & Promotions Manager',
     soc: '11-2011',
