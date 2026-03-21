@@ -1,12 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
-import Login      from './pages/Login'
-import Signup     from './pages/Signup'
-import Dashboard  from './pages/Dashboard'
-import Profile    from './pages/Profile'
-import NewReport  from './pages/NewReport'
-import ReportView from './pages/ReportView'
+import Login          from './pages/Login'
+import Signup         from './pages/Signup'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword  from './pages/ResetPassword'
+import Dashboard      from './pages/Dashboard'
+import Profile        from './pages/Profile'
+import NewReport      from './pages/NewReport'
+import ReportView     from './pages/ReportView'
 
 // Protected route — redirects to /login if not authenticated
 function ProtectedRoute({ children }) {
@@ -30,8 +32,10 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           {/* Public */}
-          <Route path="/login"  element={<PublicRoute><Login  /></PublicRoute>} />
-          <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+          <Route path="/login"           element={<PublicRoute><Login          /></PublicRoute>} />
+          <Route path="/signup"          element={<PublicRoute><Signup         /></PublicRoute>} />
+          <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+          <Route path="/reset-password"  element={<ResetPassword />} />
 
           {/* Protected */}
           <Route path="/dashboard"    element={<ProtectedRoute><Dashboard  /></ProtectedRoute>} />
