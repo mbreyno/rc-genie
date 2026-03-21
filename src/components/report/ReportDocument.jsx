@@ -6,6 +6,7 @@
  *  2. Chart columns use a <table> instead of flex — prevents SVG right-side clipping
  *  3. minHeight (not height) on Page — content never gets clipped by overflow:hidden
  */
+import { useEffect, useRef } from 'react'
 import { CATEGORIES } from '../../data/occupations'
 import { formatCurrency } from '../../utils/calculations'
 
@@ -86,44 +87,65 @@ function Page({ children, logoUrl, firmName, clientName, companyName, reportYear
   )
 }
 
-// ─── Donut chart (SVG) ───────────────────────────────────────────────────────
-function DonutChart({ segments, size = 170 }) {
-  const cx = size / 2, cy = size / 2
-  const r = 54, stroke = 26
-  const total = segments.reduce((s, seg) => s + seg.value, 0)
-  if (total === 0) return null
+// ─── Donut chart (Canvas) ────────────────────────────────────────────────────
+// Uses <canvas> + useEffect so html2canvas copies pixel data directly —
+// no SVG arc interpretation, no clipping of small segments.
+function DonutCanvas({ segments, size = 160 }) {
+  const ref = useRef(null)
+  const total = segments.reduce((s, g) => s + g.value, 0) || 1
 
-  let cumAngle = -Math.PI / 2
-  const arcs = segments.map(seg => {
-    const angle = (seg.value / total) * 2 * Math.PI
-    const midA = cumAngle + angle / 2
-    const x1 = cx + r * Math.cos(cumAngle)
-    const y1 = cy + r * Math.sin(cumAngle)
-    cumAngle += angle
-    const x2 = cx + r * Math.cos(cumAngle)
-    const y2 = cy + r * Math.sin(cumAngle)
-    return { ...seg, x1, y1, x2, y2, large: angle > Math.PI ? 1 : 0,
-      lx: cx + r * Math.cos(midA), ly: cy + r * Math.sin(midA) }
-  })
+  useEffect(() => {
+    const canvas = ref.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    // Retina-sharp: scale by devicePixelRatio
+    const dpr = window.devicePixelRatio || 1
+    canvas.width  = size * dpr
+    canvas.height = size * dpr
+    ctx.scale(dpr, dpr)
+
+    const cx = size / 2, cy = size / 2
+    const outerR = size * 0.42   // outer ring radius
+    const innerR = size * 0.26   // inner hole radius
+
+    let startAngle = -Math.PI / 2
+
+    for (const seg of segments) {
+      const angle = (seg.value / total) * 2 * Math.PI
+      const endAngle = startAngle + angle
+
+      // Draw filled annular sector (outer arc → inner arc reversed → close)
+      ctx.beginPath()
+      ctx.arc(cx, cy, outerR, startAngle, endAngle)
+      ctx.arc(cx, cy, innerR, endAngle, startAngle, true)
+      ctx.closePath()
+      ctx.fillStyle = seg.color
+      ctx.fill()
+
+      // Percentage label inside the ring
+      const pct = Math.round(seg.value / total * 100)
+      if (pct >= 5) {
+        const midA = startAngle + angle / 2
+        const lr   = (outerR + innerR) / 2
+        ctx.fillStyle    = 'white'
+        ctx.font         = `bold ${Math.round(size * 0.065)}px Arial`
+        ctx.textAlign    = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText(`${pct}%`, cx + lr * Math.cos(midA), cy + lr * Math.sin(midA))
+      }
+
+      startAngle = endAngle
+    }
+  }, [segments, size, total])
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}
-      style={{ display: 'block', margin: '0 auto', overflow: 'visible' }}>
-      {arcs.map((arc, i) => (
-        <path key={i}
-          d={`M ${arc.x1} ${arc.y1} A ${r} ${r} 0 ${arc.large} 1 ${arc.x2} ${arc.y2}`}
-          fill="none" stroke={arc.color} strokeWidth={stroke} strokeLinecap="butt" />
-      ))}
-      <circle cx={cx} cy={cy} r={r - stroke / 2} fill="white" />
-      {arcs.map((arc, i) => (
-        arc.value >= 5 ? (
-          <text key={i} x={arc.lx} y={arc.ly} textAnchor="middle" dominantBaseline="middle"
-            fontSize="9" fontWeight="700" fill="white">
-            {Math.round(arc.value)}%
-          </text>
-        ) : null
-      ))}
-    </svg>
+    <canvas
+      ref={ref}
+      width={size}
+      height={size}
+      style={{ display: 'block', margin: '0 auto', width: size + 'px', height: size + 'px' }}
+    />
   )
 }
 
@@ -140,7 +162,7 @@ function ChartWithLegend({ title, segments }) {
           </div>
         ))}
       </div>
-      <DonutChart segments={segments} />
+      <DonutCanvas segments={segments} size={160} />
     </div>
   )
 }
