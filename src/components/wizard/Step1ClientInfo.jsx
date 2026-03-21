@@ -15,7 +15,7 @@ export default function Step1ClientInfo({ data, updateData, next }) {
           <div>
             <label className="form-label">First name *</label>
             <input
-              type="text" className="form-input" placeholder="Jennifer"
+              type="text" className="form-input" placeholder="First name"
               value={data.clientFirstName}
               onChange={e => updateData({ clientFirstName: e.target.value })}
             />
@@ -23,7 +23,7 @@ export default function Step1ClientInfo({ data, updateData, next }) {
           <div>
             <label className="form-label">Last name *</label>
             <input
-              type="text" className="form-input" placeholder="Denney"
+              type="text" className="form-input" placeholder="Last name"
               value={data.clientLastName}
               onChange={e => updateData({ clientLastName: e.target.value })}
             />
@@ -32,7 +32,7 @@ export default function Step1ClientInfo({ data, updateData, next }) {
         <div>
           <label className="form-label">Company / S-Corp name *</label>
           <input
-            type="text" className="form-input" placeholder="Elevated Marketing Solutions"
+            type="text" className="form-input" placeholder="Company name"
             value={data.companyName}
             onChange={e => updateData({ companyName: e.target.value })}
           />
