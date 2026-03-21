@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 export default function Signup() {
-  const [form,      setForm]      = useState({ email: '', password: '', confirm: '', advisorName: '', firmName: '' })
-  const [error,     setError]     = useState('')
-  const [loading,   setLoading]   = useState(false)
-  const [confirmed, setConfirmed] = useState(false)
+  const navigate = useNavigate()
+  const [form,    setForm]    = useState({ email: '', password: '', confirm: '', advisorName: '', firmName: '' })
+  const [error,   setError]   = useState('')
+  const [loading, setLoading] = useState(false)
 
   function set(field) { return e => setForm(f => ({ ...f, [field]: e.target.value })) }
 
@@ -33,37 +33,10 @@ export default function Signup() {
 
     if (signUpError) { setError(signUpError.message); setLoading(false); return }
 
-    // Show "check your email" screen
-    setConfirmed(true)
+    // Redirect to login with a flag so the login page shows a confirmation notice
+    navigate('/login?registered=true')
   }
 
-  // ── Check-your-email screen ──────────────────────────────────────────────
-  if (confirmed) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-50 to-slate-100 px-4">
-        <div className="w-full max-w-md text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-600 rounded-2xl mb-6 shadow-lg">
-            <svg className="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Check your email</h1>
-          <p className="text-gray-500 mb-1">
-            We sent a confirmation link to <span className="font-medium text-gray-700">{form.email}</span>.
-          </p>
-          <p className="text-gray-500 text-sm mb-8">
-            Click the link in the email to activate your account, then come back here to sign in.
-          </p>
-          <Link to="/login" className="btn-primary inline-flex">
-            Go to sign in
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  // ── Sign-up form ─────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-50 to-slate-100 px-4 py-10">
       <div className="w-full max-w-md">
