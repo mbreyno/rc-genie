@@ -1,7 +1,7 @@
 /**
  * BLS Occupation data with SOC codes and fallback wage data (2024 BLS OES).
  * Wages are hourly: { entry: 25th pct, average: median, experienced: 75th pct }
- * SOC codes used to fetch live data from BLS API via Netlify Function.
+ * SOC codes used to fetch live data from BLS API via Vercel API route (/api/bls-wages).
  */
 
 export const CATEGORIES = {
