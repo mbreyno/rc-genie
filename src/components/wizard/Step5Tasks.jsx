@@ -8,7 +8,12 @@ const CATEGORY_ORDER = ['marketing', 'finance', 'hr', 'management', 'myBusiness'
 async function fetchAndApplyLiveWages(data) {
   const allTasks = CATEGORY_ORDER.flatMap(catId => data.taskSelections[catId] ?? [])
   const socCodes = [...new Set(allTasks.map(t => t.soc).filter(Boolean))]
-  if (!socCodes.length || !data.stateFips) return data.taskSelections
+
+  console.log('[BLS] stateFips:', data.stateFips, '| msaCode:', data.msaCode)
+  console.log('[BLS] SOC codes to fetch:', socCodes)
+
+  if (!socCodes.length) { console.warn('[BLS] No SOC codes — skipping'); return data.taskSelections }
+  if (!data.stateFips)  { console.warn('[BLS] No stateFips — skipping'); return data.taskSelections }
 
   try {
     const res = await fetch('/api/bls-wages', {
@@ -20,22 +25,37 @@ async function fetchAndApplyLiveWages(data) {
         msaCode:   data.msaCode || '',
       }),
     })
-    if (!res.ok) return data.taskSelections
-    const { wages } = await res.json()
-    if (!wages || !Object.keys(wages).length) return data.taskSelections
+
+    console.log('[BLS] Response status:', res.status)
+    if (!res.ok) {
+      const text = await res.text()
+      console.error('[BLS] API error response:', text)
+      return data.taskSelections
+    }
+
+    const json = await res.json()
+    console.log('[BLS] Response:', json)
+
+    const { wages } = json
+    if (!wages || !Object.keys(wages).length) {
+      console.warn('[BLS] No wages returned — using fallback data')
+      return data.taskSelections
+    }
 
     // Apply live wages to each task, falling back to existing wage if not found
     const updated = {}
     for (const catId of CATEGORY_ORDER) {
       updated[catId] = (data.taskSelections[catId] ?? []).map(task => {
         const liveWage = wages[task.soc]?.[task.proficiency]
+        console.log(`[BLS] ${task.title} (${task.soc}) ${task.proficiency}: ${liveWage ?? 'no data, using fallback'}`)
         return liveWage
           ? { ...task, hourlyWage: liveWage, wageSource: 'live' }
           : { ...task, wageSource: 'fallback' }
       })
     }
     return updated
-  } catch {
+  } catch (err) {
+    console.error('[BLS] Fetch threw an error:', err)
     return data.taskSelections
   }
 }
