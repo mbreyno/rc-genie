@@ -28,8 +28,23 @@ function buildMsaSeriesId(cbsaCode, soc, datatype) {
 
 // Datatypes: 07=25th pct (entry), 08=median (average), 09=75th pct (experienced)
 const DATATYPES = { entry: '07', average: '08', experienced: '09' }
+const DATATYPE_TO_LEVEL = Object.fromEntries(Object.entries(DATATYPES).map(([k, v]) => [v, k]))
 
-async function fetchWages(seriesIds) {
+// Build series IDs and a reverse lookup map: seriesId → { soc, level }
+function buildSeriesMap(buildFn, locationArg, socCodes) {
+  const ids = []
+  const lookup = {}
+  for (const soc of socCodes) {
+    for (const [level, dt] of Object.entries(DATATYPES)) {
+      const id = buildFn(locationArg, soc, dt)
+      ids.push(id)
+      lookup[id] = { soc, level }
+    }
+  }
+  return { ids, lookup }
+}
+
+async function fetchWages(seriesIds, lookup) {
   const allResults = {}
   const chunks = []
   for (let i = 0; i < seriesIds.length; i += 50) {
@@ -60,25 +75,21 @@ async function fetchWages(seriesIds) {
     }
 
     if (data.status !== 'REQUEST_SUCCEEDED') {
-      console.warn('BLS API non-success:', data.message)
+      console.warn('BLS API non-success:', data.message, data.message)
       return null
     }
 
     for (const series of (data.Results?.series ?? [])) {
-      const sid = series.seriesID
-      // Extract SOC (chars 12–17) and datatype (chars 18–19) — same offset for both state and MSA
-      const socDigits    = sid.slice(12, 18)
-      const socFormatted = `${socDigits.slice(0, 2)}-${socDigits.slice(2)}`
-      const datatype     = sid.slice(18, 20)
+      // Use the lookup map — no fragile string slicing needed
+      const meta = lookup[series.seriesID]
+      if (!meta) continue
 
       const latestEntry = series.data?.find(d => d.period === 'M13') ?? series.data?.[0]
       if (!latestEntry?.value || latestEntry.value === '-') continue
 
       const wage = parseFloat(latestEntry.value)
-      if (!allResults[socFormatted]) allResults[socFormatted] = {}
-      for (const [level, dt] of Object.entries(DATATYPES)) {
-        if (dt === datatype) allResults[socFormatted][level] = wage
-      }
+      if (!allResults[meta.soc]) allResults[meta.soc] = {}
+      allResults[meta.soc][meta.level] = wage
     }
   }
 
@@ -109,14 +120,8 @@ export default async function handler(req, res) {
 
   // ── Try MSA-level first (if an MSA code was provided) ───────────────────
   if (msaCode) {
-    const msaSeriesIds = []
-    for (const soc of socCodes) {
-      for (const dt of Object.values(DATATYPES)) {
-        msaSeriesIds.push(buildMsaSeriesId(msaCode, soc, dt))
-      }
-    }
-
-    const msaWages = await fetchWages(msaSeriesIds)
+    const { ids: msaIds, lookup: msaLookup } = buildSeriesMap(buildMsaSeriesId, msaCode, socCodes)
+    const msaWages = await fetchWages(msaIds, msaLookup)
     if (msaWages && hasUsableData(msaWages)) {
       return res.status(200).json({ wages: msaWages, geoLevel: 'msa' })
     }
@@ -124,14 +129,8 @@ export default async function handler(req, res) {
   }
 
   // ── Fall back to state-level ─────────────────────────────────────────────
-  const stateSeriesIds = []
-  for (const soc of socCodes) {
-    for (const dt of Object.values(DATATYPES)) {
-      stateSeriesIds.push(buildStateSeriesId(stateFips, soc, dt))
-    }
-  }
-
-  const stateWages = await fetchWages(stateSeriesIds)
+  const { ids: stateIds, lookup: stateLookup } = buildSeriesMap(buildStateSeriesId, stateFips, socCodes)
+  const stateWages = await fetchWages(stateIds, stateLookup)
   if (!stateWages) return emptyResponse('BLS API unavailable — using fallback data')
 
   return res.status(200).json({ wages: stateWages, geoLevel: 'state' })
