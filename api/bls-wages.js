@@ -46,6 +46,7 @@ function buildSeriesMap(buildFn, locationArg, socCodes) {
 
 async function fetchWages(seriesIds, lookup) {
   const allResults = {}
+  const debug = { seriesIdsSent: seriesIds, blsStatus: null, seriesReturned: [], lookupMisses: [] }
   const chunks = []
   for (let i = 0; i < seriesIds.length; i += 50) {
     chunks.push(seriesIds.slice(i, i + 50))
@@ -71,18 +72,22 @@ async function fetchWages(seriesIds, lookup) {
       data = await response.json()
     } catch (err) {
       console.error('BLS API fetch error:', err)
-      return null
+      debug.blsStatus = 'FETCH_ERROR'
+      return { results: null, debug }
     }
 
+    debug.blsStatus = data.status
+    debug.blsMessage = data.message
+
     if (data.status !== 'REQUEST_SUCCEEDED') {
-      console.warn('BLS API non-success:', data.message, data.message)
-      return null
+      console.warn('BLS API non-success:', data.message)
+      return { results: null, debug }
     }
 
     for (const series of (data.Results?.series ?? [])) {
-      // Use the lookup map — no fragile string slicing needed
+      debug.seriesReturned.push(series.seriesID)
       const meta = lookup[series.seriesID]
-      if (!meta) continue
+      if (!meta) { debug.lookupMisses.push(series.seriesID); continue }
 
       const latestEntry = series.data?.find(d => d.period === 'M13') ?? series.data?.[0]
       if (!latestEntry?.value || latestEntry.value === '-') continue
@@ -93,7 +98,7 @@ async function fetchWages(seriesIds, lookup) {
     }
   }
 
-  return allResults
+  return { results: allResults, debug }
 }
 
 function hasUsableData(wages) {
@@ -124,23 +129,23 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'socCodes array is required' })
   }
 
-  const emptyResponse = (warning) =>
-    res.status(200).json({ wages: {}, geoLevel: 'none', warning })
+  const emptyResponse = (warning, debug) =>
+    res.status(200).json({ wages: {}, geoLevel: 'none', warning, debug })
 
   // ── Try MSA-level first (if an MSA code was provided) ───────────────────
   if (msaCode) {
     const { ids: msaIds, lookup: msaLookup } = buildSeriesMap(buildMsaSeriesId, msaCode, socCodes)
-    const msaWages = await fetchWages(msaIds, msaLookup)
+    const { results: msaWages, debug: msaDebug } = await fetchWages(msaIds, msaLookup)
     if (msaWages && hasUsableData(msaWages)) {
-      return res.status(200).json({ wages: msaWages, geoLevel: 'msa' })
+      return res.status(200).json({ wages: msaWages, geoLevel: 'msa', debug: msaDebug })
     }
     console.log(`MSA ${msaCode} returned no data — falling back to state ${stateFips}`)
   }
 
   // ── Fall back to state-level ─────────────────────────────────────────────
   const { ids: stateIds, lookup: stateLookup } = buildSeriesMap(buildStateSeriesId, stateFips, socCodes)
-  const stateWages = await fetchWages(stateIds, stateLookup)
-  if (!stateWages) return emptyResponse('BLS API unavailable — using fallback data')
+  const { results: stateWages, debug: stateDebug } = await fetchWages(stateIds, stateLookup)
+  if (!stateWages) return emptyResponse('BLS API unavailable — using fallback data', stateDebug)
 
-  return res.status(200).json({ wages: stateWages, geoLevel: 'state' })
+  return res.status(200).json({ wages: stateWages, geoLevel: 'state', debug: stateDebug })
 }
