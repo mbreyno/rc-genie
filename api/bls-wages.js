@@ -54,8 +54,8 @@ async function fetchWages(seriesIds, lookup) {
   for (const chunk of chunks) {
     const payload = {
       seriesid:      chunk,
-      startyear:     String(new Date().getFullYear() - 1),
-      endyear:       String(new Date().getFullYear()),
+      startyear:     String(new Date().getFullYear() - 2),
+      endyear:       String(new Date().getFullYear() - 1),
       calculations:  false,
       annualaverage: false,
     }
@@ -109,7 +109,16 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const { socCodes = [], stateFips = '00', msaCode = '' } = req.body ?? {}
+  // Vercel plain functions don't auto-parse JSON — handle both parsed object and raw string
+  let parsedBody = {}
+  try {
+    parsedBody = typeof req.body === 'string' ? JSON.parse(req.body)
+               : Buffer.isBuffer(req.body)    ? JSON.parse(req.body.toString())
+               : req.body ?? {}
+  } catch {
+    return res.status(400).json({ error: 'Invalid JSON body' })
+  }
+  const { socCodes = [], stateFips = '00', msaCode = '' } = parsedBody
 
   if (!socCodes.length) {
     return res.status(400).json({ error: 'socCodes array is required' })
