@@ -3,8 +3,46 @@ import { CATEGORIES, getOccupationsForCategory, PROFICIENCY_LEVELS } from '../..
 
 const CATEGORY_ORDER = ['marketing', 'finance', 'hr', 'management', 'myBusiness']
 
+// Fetch location-adjusted wages from BLS API and apply to task selections.
+// Falls back to existing static wage if the API has no data for a given SOC.
+async function fetchAndApplyLiveWages(data) {
+  const allTasks = CATEGORY_ORDER.flatMap(catId => data.taskSelections[catId] ?? [])
+  const socCodes = [...new Set(allTasks.map(t => t.soc).filter(Boolean))]
+  if (!socCodes.length || !data.stateFips) return data.taskSelections
+
+  try {
+    const res = await fetch('/api/bls-wages', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        socCodes,
+        stateFips: data.stateFips,
+        msaCode:   data.msaCode || '',
+      }),
+    })
+    if (!res.ok) return data.taskSelections
+    const { wages } = await res.json()
+    if (!wages || !Object.keys(wages).length) return data.taskSelections
+
+    // Apply live wages to each task, falling back to existing wage if not found
+    const updated = {}
+    for (const catId of CATEGORY_ORDER) {
+      updated[catId] = (data.taskSelections[catId] ?? []).map(task => {
+        const liveWage = wages[task.soc]?.[task.proficiency]
+        return liveWage
+          ? { ...task, hourlyWage: liveWage, wageSource: 'live' }
+          : { ...task, wageSource: 'fallback' }
+      })
+    }
+    return updated
+  } catch {
+    return data.taskSelections
+  }
+}
+
 export default function Step5Tasks({ data, updateData, next, prev }) {
   const [activeCategory, setActiveCategory] = useState('marketing')
+  const [fetchingWages,  setFetchingWages]  = useState(false)
 
   // Only show categories with time allocated
   const activeCategories = CATEGORY_ORDER.filter(id => (data.categoryAllocations[id] ?? 0) > 0)
@@ -74,6 +112,14 @@ export default function Step5Tasks({ data, updateData, next, prev }) {
     const sum = tasks.reduce((s, t) => s + (t.pctOfCategory || 0), 0)
     return sum === 100
   })
+
+  async function handleNext() {
+    setFetchingWages(true)
+    const updatedSelections = await fetchAndApplyLiveWages(data)
+    updateData({ taskSelections: updatedSelections })
+    setFetchingWages(false)
+    next()
+  }
 
   return (
     <div>
@@ -172,7 +218,15 @@ export default function Step5Tasks({ data, updateData, next, prev }) {
                                 title={lvl.description}
                               >
                                 {lvl.label}
-                                <div className="font-semibold">${occ.wages[lvl.value].toFixed(2)}/hr</div>
+                                <div className="font-semibold">
+                                  ${(task.proficiency === lvl.value && task.wageSource === 'live'
+                                    ? task.hourlyWage
+                                    : occ.wages[lvl.value]
+                                  ).toFixed(2)}/hr
+                                </div>
+                                {task.proficiency === lvl.value && task.wageSource === 'live' && (
+                                  <div className="text-[10px] opacity-80">location-adjusted</div>
+                                )}
                               </button>
                             ))}
                           </div>
@@ -223,9 +277,17 @@ export default function Step5Tasks({ data, updateData, next, prev }) {
       ))}
 
       <div className="mt-6 flex justify-between">
-        <button onClick={prev} className="btn-secondary">← Back</button>
-        <button onClick={next} disabled={!isValid} className="btn-primary">
-          Review Report →
+        <button onClick={prev} disabled={fetchingWages} className="btn-secondary">← Back</button>
+        <button onClick={handleNext} disabled={!isValid || fetchingWages} className="btn-primary flex items-center gap-2">
+          {fetchingWages ? (
+            <>
+              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              Fetching location wages…
+            </>
+          ) : 'Review Report →'}
         </button>
       </div>
     </div>
