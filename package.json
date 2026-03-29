@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "fetch-bls": "node scripts/fetch-bls-data.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
@@ -16,6 +17,8 @@
     "react-router-dom": "^6.21.0"
   },
   "devDependencies": {
+    "unzipper": "^0.12.3",
+    "xlsx": "^0.18.5",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",

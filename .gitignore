@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# BLS data cache (zip files downloaded by scripts/fetch-bls-data.js)
+# The generated api/blsWages.json IS committed; these raw zips are not
+.bls-cache/
+
+# Editor / OS
+.DS_Store
+*.local

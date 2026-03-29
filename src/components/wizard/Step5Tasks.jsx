@@ -3,8 +3,8 @@ import { CATEGORIES, getOccupationsForCategory, PROFICIENCY_LEVELS } from '../..
 
 const CATEGORY_ORDER = ['marketing', 'finance', 'hr', 'management', 'myBusiness']
 
-// Fetch location-adjusted wages from BLS API and apply to task selections.
-// Falls back to a state-level wage ratio when occupation-specific data is unavailable.
+// Fetch location-adjusted wages from the BLS OEWS dataset and apply to task selections.
+// geoLevel from the API: 'msa' | 'state' | 'national'
 async function fetchAndApplyLiveWages(data) {
   const allTasks = CATEGORY_ORDER.flatMap(catId => data.taskSelections[catId] ?? [])
   const socCodes = [...new Set(allTasks.map(t => t.soc).filter(Boolean))]
@@ -25,36 +25,19 @@ async function fetchAndApplyLiveWages(data) {
     if (!res.ok) return data.taskSelections
 
     const json = await res.json()
+    if (!json.wages || !Object.keys(json.wages).length) return data.taskSelections
 
-    // ── Case 1: occupation-specific wages returned (MSA or state series) ──
-    if (json.wages && Object.keys(json.wages).length > 0) {
-      const updated = {}
-      for (const catId of CATEGORY_ORDER) {
-        updated[catId] = (data.taskSelections[catId] ?? []).map(task => {
-          const liveWage = json.wages[task.soc]?.[task.proficiency]
-          return liveWage
-            ? { ...task, hourlyWage: liveWage, wageSource: 'live' }
-            : task
-        })
-      }
-      return updated
+    const wageSource = json.geoLevel  // 'msa' | 'state' | 'national'
+    const updated = {}
+    for (const catId of CATEGORY_ORDER) {
+      updated[catId] = (data.taskSelections[catId] ?? []).map(task => {
+        const liveWage = json.wages[task.soc]?.[task.proficiency]
+        return liveWage
+          ? { ...task, hourlyWage: liveWage, wageSource }
+          : task
+      })
     }
-
-    // ── Case 2: state wage ratio fallback ─────────────────────────────────
-    if (json.stateRatio) {
-      const ratio = json.stateRatio
-      const updated = {}
-      for (const catId of CATEGORY_ORDER) {
-        updated[catId] = (data.taskSelections[catId] ?? []).map(task => ({
-          ...task,
-          hourlyWage: parseFloat((task.hourlyWage * ratio).toFixed(2)),
-          wageSource: 'state-adjusted',
-        }))
-      }
-      return updated
-    }
-
-    return data.taskSelections
+    return updated
   } catch {
     return data.taskSelections
   }
@@ -100,12 +83,9 @@ export default function Step5Tasks({ data, updateData, next, prev }) {
     const updated = getSelectedTasks(catId).map(t => {
       if (t.occupationId !== occId) return t
       const occ = getOccupationsForCategory(catId, data.industryId).find(o => o.id === occId)
-      const baseWage = occ?.wages[proficiency] ?? t.hourlyWage
-      // Preserve state wage ratio when switching proficiency
-      const hourlyWage = (t.wageSource === 'state-adjusted' && occ?.wages[t.proficiency])
-        ? parseFloat((baseWage * (t.hourlyWage / occ.wages[t.proficiency])).toFixed(2))
-        : baseWage
-      return { ...t, proficiency, hourlyWage, wageSource: t.wageSource }
+      // Use static baseline wages when switching — live wages get re-applied on "Review Report"
+      const hourlyWage = occ?.wages[proficiency] ?? t.hourlyWage
+      return { ...t, proficiency, hourlyWage, wageSource: undefined }
     })
     updateData({ taskSelections: { ...data.taskSelections, [catId]: updated } })
   }
@@ -243,15 +223,15 @@ export default function Step5Tasks({ data, updateData, next, prev }) {
                               >
                                 {lvl.label}
                                 <div className="font-semibold">
-                                  ${(task.proficiency === lvl.value && (task.wageSource === 'live' || task.wageSource === 'state-adjusted')
+                                  ${(task.proficiency === lvl.value && task.wageSource
                                     ? task.hourlyWage
-                                    : task.wageSource === 'state-adjusted'
-                                      ? parseFloat((occ.wages[lvl.value] * (task.hourlyWage / occ.wages[task.proficiency])).toFixed(2))
-                                      : occ.wages[lvl.value]
+                                    : occ.wages[lvl.value]
                                   ).toFixed(2)}/hr
                                 </div>
-                                {task.proficiency === lvl.value && (task.wageSource === 'live' || task.wageSource === 'state-adjusted') && (
-                                  <div className="text-[10px] opacity-80">location-adjusted</div>
+                                {task.proficiency === lvl.value && task.wageSource && (
+                                  <div className="text-[10px] opacity-80">
+                                    {task.wageSource === 'msa' ? 'metro area' : task.wageSource}-adjusted
+                                  </div>
                                 )}
                               </button>
                             ))}
