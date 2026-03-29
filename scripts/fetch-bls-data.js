@@ -73,29 +73,7 @@ function normalizeRow(row) {
   return out
 }
 
-// ── Verify a file is a valid ZIP (starts with PK magic bytes) ─────────────────
-function isValidZip(filePath) {
-  try {
-    const buf = Buffer.alloc(4)
-    const fd = (await import('fs')).openSync(filePath, 'r')
-    ;(await import('fs')).readSync(fd, buf, 0, 4, 0)
-    ;(await import('fs')).closeSync(fd)
-    return buf[0] === 0x50 && buf[1] === 0x4B  // PK
-  } catch {
-    return false
-  }
-}
-
-// ── Synchronous magic-byte check ─────────────────────────────────────────────
-function checkZipMagic(filePath) {
-  const buf = Buffer.alloc(4)
-  const { openSync, readSync, closeSync } = await import('fs')
-  const fd = openSync(filePath, 'r')
-  readSync(fd, buf, 0, 4, 0)
-  closeSync(fd)
-  return buf[0] === 0x50 && buf[1] === 0x4B
-}
-
+// ── Validate that a file is a real ZIP (starts with PK magic bytes) ──────────
 function validateZip(filePath) {
   const buf = readFileSync(filePath)
   if (buf.length < 4 || buf[0] !== 0x50 || buf[1] !== 0x4B) {
