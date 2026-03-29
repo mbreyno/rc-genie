@@ -2,253 +2,271 @@
 /**
  * scripts/fetch-bls-data.js
  *
- * Reads the BLS OEWS "All data (TXT)" file and extracts hourly wage data
- * for every occupation in src/data/occupations.js, organized by national,
- * state, and MSA (metro area) geography.
+ * Downloads the BLS OES time-series flat file and extracts hourly wage data
+ * for every occupation in src/data/occupations.js, at national, state, and
+ * MSA (metro area) level.
  *
- * Output: api/blsWages.json  (committed to repo — no runtime downloads needed)
+ * Data source: https://download.bls.gov/pub/time.series/oe/
+ * Files used:
+ *   oe.data.0.Current  (~330 MB) — current annual wages for all OES series
  *
- * ── Setup (one-time) ─────────────────────────────────────────────────────────
- * 1. Go to https://www.bls.gov/oes/tables.htm
- * 2. Find the most recent "May 20XX" section
- * 3. Click "All data (TXT)" and save to: .bls-cache/
- *    (It may download as a .zip — that's fine, the script handles both)
- * 4. Run: npm run fetch-bls
+ * Wages extracted (all hourly):
+ *   entry       = datatype 07 (hourly 25th percentile)
+ *   average     = datatype 03 (hourly mean)
+ *   experienced = datatype 09 (hourly 75th percentile)
  *
- * ── Updating annually ────────────────────────────────────────────────────────
- * Each May, BLS releases new OEWS data. Repeat steps 1-4 with the new file,
- * then commit the updated api/blsWages.json.
+ * Series ID format (25 chars):
+ *   OE + U + [area_type:1] + [area_code:7] + [industry:6] + [soc:6] + [datatype:2]
+ *   Area types:  N=National  S=State  M=Metro MSA
+ *   Area codes:  National=0000000  State=FIPS+"00000"  MSA="00"+CBSA
+ *
+ * Output: api/blsWages.json  (commit this to your repo)
+ *
+ * Run:   npm run fetch-bls
+ * Cache: Downloaded file is saved to .bls-cache/ and reused on subsequent runs.
+ *        Delete .bls-cache/oe.data.0.Current to force a fresh download.
+ * Update: Re-run periodically — BLS updates this file each spring (March–May).
  */
 
-import { readFileSync, writeFileSync, readdirSync, existsSync } from 'fs'
-import { createReadStream }  from 'fs'
-import { createInterface }   from 'readline'
-import { resolve, dirname }  from 'path'
-import { fileURLToPath }     from 'url'
-import unzipper              from 'unzipper'
+import { createWriteStream, createReadStream, readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs'
+import { createInterface } from 'readline'
+import { resolve, dirname } from 'path'
+import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT      = resolve(__dirname, '..')
 const CACHE_DIR = resolve(ROOT, '.bls-cache')
 const OUTPUT    = resolve(ROOT, 'api', 'blsWages.json')
 
-// ── Find the data file in .bls-cache/ ────────────────────────────────────────
-function findDataFile() {
-  if (!existsSync(CACHE_DIR)) {
-    throw new Error(
-      `.bls-cache/ folder not found.\n\n` +
-      `  1. mkdir .bls-cache\n` +
-      `  2. Download "All data (TXT)" from https://www.bls.gov/oes/tables.htm\n` +
-      `  3. Save to .bls-cache/\n` +
-      `  4. Re-run: npm run fetch-bls`
-    )
-  }
+const DATA_URL  = 'https://download.bls.gov/pub/time.series/oe/oe.data.0.Current'
+const DATA_FILE = 'oe.data.0.Current'
 
-  const files = readdirSync(CACHE_DIR)
-
-  // Prefer TXT files (fast streaming parse)
-  const txtFiles = files.filter(f => f.toLowerCase().endsWith('.txt') && f.toLowerCase().includes('all_data'))
-  if (txtFiles.length > 0) {
-    const chosen = txtFiles.sort().at(-1)
-    console.log(`  Found TXT: ${chosen}`)
-    return { path: resolve(CACHE_DIR, chosen), type: 'txt' }
-  }
-
-  // Accept a zip containing a txt file
-  const zipFiles = files.filter(f => f.toLowerCase().endsWith('.zip') && f.toLowerCase().includes('all_data'))
-  if (zipFiles.length > 0) {
-    const chosen = zipFiles.sort().at(-1)
-    console.log(`  Found ZIP: ${chosen}`)
-    return { path: resolve(CACHE_DIR, chosen), type: 'zip' }
-  }
-
-  // Last resort: any zip or txt in the cache dir
-  const anyTxt = files.filter(f => f.toLowerCase().endsWith('.txt'))
-  if (anyTxt.length === 1) {
-    console.log(`  Found TXT: ${anyTxt[0]}`)
-    return { path: resolve(CACHE_DIR, anyTxt[0]), type: 'txt' }
-  }
-  const anyZip = files.filter(f => f.toLowerCase().endsWith('.zip'))
-  if (anyZip.length === 1) {
-    console.log(`  Found ZIP: ${anyZip[0]}`)
-    return { path: resolve(CACHE_DIR, anyZip[0]), type: 'zip' }
-  }
-
-  throw new Error(
-    `No data file found in .bls-cache/.\n\n` +
-    `  Download "All data (TXT)" from https://www.bls.gov/oes/tables.htm\n` +
-    `  and save it to .bls-cache/\n\n` +
-    `  Files currently in .bls-cache/: ${files.join(', ') || '(none)'}`
-  )
+// Hourly wage data types we extract
+const DATATYPE_MAP = {
+  '07': 'entry',        // hourly 25th percentile
+  '03': 'average',      // hourly mean
+  '09': 'experienced',  // hourly 75th percentile
 }
 
-// ── Extract all unique SOC codes from occupations.js ─────────────────────────
+// ── Load SOC codes from occupations.js ───────────────────────────────────────
 function loadSocCodes() {
   const src = readFileSync(resolve(ROOT, 'src/data/occupations.js'), 'utf8')
   const matches = [...src.matchAll(/soc:\s*['"]([0-9]{2}-[0-9]{4})['"]/g)]
   return new Set(matches.map(m => m[1]))
 }
 
-// ── Parse a wage value — BLS uses '#' (not published) and '*' (suppressed) ───
+// ── Parse a wage value — BLS uses '-' and '*' for missing/suppressed ─────────
 function parseWage(val) {
-  if (!val) return null
-  const s = String(val).trim()
-  if (s === '#' || s === '*' || s === '-' || s === '') return null
-  const n = parseFloat(s.replace(/,/g, ''))
+  const s = String(val ?? '').trim()
+  if (!s || s === '-' || s === '*' || s === '#') return null
+  const n = parseFloat(s)
   return isNaN(n) ? null : n
 }
 
-// ── Get a readable stream for the data (handles plain txt or zip) ─────────────
-async function getReadStream({ path, type }) {
-  if (type === 'txt') {
-    return createReadStream(path, { encoding: 'utf8' })
-  }
+// ── Download a file with progress ─────────────────────────────────────────────
+async function download(url, dest) {
+  const filename = url.split('/').pop()
+  process.stdout.write(`  Downloading ${filename}...`)
 
-  // Zip: find the txt file inside and stream it
-  const dir = await unzipper.Open.file(path)
-  const entry = dir.files.find(f => f.path.toLowerCase().endsWith('.txt'))
-  if (!entry) throw new Error(`No .txt file found inside ${path}`)
-  console.log(`  Extracting from zip: ${entry.path}`)
-  return entry.stream()
+  const res = await fetch(url, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; bls-wage-fetcher/2.0)' },
+  })
+  if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`)
+
+  const total  = parseInt(res.headers.get('content-length') || '0')
+  let received = 0
+  const writer = createWriteStream(dest)
+  const reader = res.body.getReader()
+
+  await new Promise((resolve, reject) => {
+    function pump() {
+      reader.read().then(({ done, value }) => {
+        if (done) { writer.end(); return }
+        received += value.length
+        if (total) {
+          const pct = Math.round(received / total * 100)
+          const mb  = (received / 1024 / 1024).toFixed(0)
+          process.stdout.write(`\r  Downloading ${filename}... ${pct}% (${mb} MB)`)
+        }
+        writer.write(value, pump)
+      }).catch(reject)
+    }
+    writer.on('finish', resolve)
+    writer.on('error', reject)
+    pump()
+  })
+
+  const mb = (received / 1024 / 1024).toFixed(1)
+  process.stdout.write(`\r  Downloaded  ${filename} (${mb} MB)\n`)
 }
 
-// ── Stream-parse a tab-separated BLS data file ───────────────────────────────
-async function parseTsv(stream, socCodes) {
-  const rl = createInterface({ input: stream, crlfDelay: Infinity })
+// ── Stream-parse the OES data file ───────────────────────────────────────────
+async function parseDataFile(filePath, socLookup) {
+  const rl = createInterface({
+    input:      createReadStream(filePath, { encoding: 'latin1' }),  // BLS files use latin1
+    crlfDelay:  Infinity,
+  })
 
-  let headers   = null
-  let rowCount  = 0
-  let kept      = 0
-  const national = {}
-  const states   = {}
-  const msas     = {}
-  const ownershipRank = { '1235': 0, '235': 1, '35': 2, '5': 3 }
-  const unknownAreaTypes = new Set()
+  let headers    = null
+  let idCol      = 0
+  let yearCol    = 1
+  let valueCol   = 3
+  let rowCount   = 0
+  let matchCount = 0
+  let maxYear    = 0
 
-  const isNational = t => ['U', 'N'].includes(String(t).trim().toUpperCase())
-  const isState    = t => String(t).trim().toUpperCase() === 'S'
-  const isMsa      = t => String(t).trim().toUpperCase() === 'M'
+  // tracker: `areaType|areaCode|soc` → { areaType, areaCode, soc, entry, average, experienced }
+  // Each wage slot: { value: number, year: number }
+  const tracker = {}
 
   for await (const line of rl) {
-    if (!line.trim()) continue
-    const cols = line.split('\t')
+    const trimmed = line.trim()
+    if (!trimmed) continue
 
+    // Parse header row to find column positions
     if (!headers) {
-      headers = cols.map(h => h.trim().toUpperCase())
-      console.log(`  Columns: ${headers.slice(0, 8).join(', ')} ...`)
+      headers  = trimmed.split('\t').map(h => h.trim().toLowerCase())
+      idCol    = Math.max(0, headers.indexOf('series_id'))
+      yearCol  = Math.max(1, headers.indexOf('year'))
+      valueCol = Math.max(3, headers.indexOf('value'))
       continue
     }
 
     rowCount++
-    if (rowCount % 500_000 === 0) {
-      process.stdout.write(`\r  Rows processed: ${(rowCount / 1_000_000).toFixed(1)}M ...`)
+    if (rowCount % 1_000_000 === 0) {
+      process.stdout.write(`\r  Scanned ${(rowCount / 1_000_000).toFixed(1)}M rows, ${matchCount.toLocaleString()} matched...`)
     }
 
-    const get = col => (cols[headers.indexOf(col)] ?? '').trim()
+    const cols = trimmed.split('\t')
+    const sid  = (cols[idCol] ?? '').trim()
 
-    // Filters
-    if (get('GROUP').toLowerCase() !== 'detailed') continue
-    const naics = get('NAICS')
-    if (naics && naics !== '000000') continue
-    const own  = get('OWN_CODE')
-    const rank = ownershipRank[own] ?? 9
-    if (rank === 9 && own !== '') continue
+    // Series must be exactly 25 chars, start with 'OEU'
+    if (sid.length !== 25 || sid[0] !== 'O' || sid[1] !== 'E' || sid[2] !== 'U') continue
 
-    const soc = get('OCC_CODE')
-    if (!socCodes.has(soc)) continue
+    const areaType  = sid[3]            // N, S, M, B, A …
+    const areaCode  = sid.slice(4, 11)  // 7-char area code
+    const industry  = sid.slice(11, 17) // 6-char NAICS (000000 = all)
+    const seriesSoc = sid.slice(17, 23) // 6-char SOC without dash
+    const datatype  = sid.slice(23, 25) // 2-char data type
 
-    const entry       = parseWage(get('H_PCT25'))
-    const average     = parseWage(get('H_MEAN'))
-    const experienced = parseWage(get('H_PCT75'))
-    if (!entry || !average || !experienced) continue
+    // Filter: all-industry, our occupations, hourly wage types, N/S/M areas only
+    if (industry  !== '000000')          continue
+    if (!(datatype in DATATYPE_MAP))     continue
+    if (!['N', 'S', 'M'].includes(areaType)) continue
+    const soc = socLookup.get(seriesSoc)
+    if (!soc) continue
 
-    const areaType = get('AREA_TYPE')
-    const areaRaw  = get('AREA')
+    const year  = parseInt((cols[yearCol]  ?? '').trim(), 10)
+    const value = parseWage(cols[valueCol])
+    if (!value || !year) continue
 
-    function store(bucket, key) {
-      if (!bucket[key]) bucket[key] = {}
-      const existing = bucket[key][soc]
-      if (!existing || rank < (existing._rank ?? 9)) {
-        bucket[key][soc] = { entry, average, experienced, _rank: rank }
-        kept++
-      }
+    if (year > maxYear) maxYear = year
+
+    const wageField = DATATYPE_MAP[datatype]
+    const key       = `${areaType}|${areaCode}|${soc}`
+
+    if (!tracker[key]) {
+      tracker[key] = { areaType, areaCode, soc }
     }
-
-    if (isNational(areaType))  { store(national, '__nat__') }
-    else if (isState(areaType)) { store(states, String(parseInt(areaRaw, 10) || 0).padStart(2, '0')) }
-    else if (isMsa(areaType))   { store(msas,   String(parseInt(areaRaw, 10) || 0).padStart(5, '0')) }
-    else { unknownAreaTypes.add(areaType || '(blank)') }
-  }
-
-  process.stdout.write('\n')
-  console.log(`  Total rows: ${rowCount.toLocaleString()} | Kept: ${kept.toLocaleString()}`)
-  if (unknownAreaTypes.size > 0) {
-    console.log(`  Skipped AREA_TYPE values: ${[...unknownAreaTypes].join(', ')} (metro divisions, nonmetro — expected)`)
-  }
-
-  // Flatten national
-  const nationalFlat = {}
-  for (const [soc, w] of Object.entries(national['__nat__'] ?? {})) {
-    const { _rank, ...rest } = w
-    nationalFlat[soc] = rest
-  }
-
-  // Strip _rank from states + msas
-  for (const bucket of [states, msas]) {
-    for (const areaWages of Object.values(bucket)) {
-      for (const w of Object.values(areaWages)) delete w._rank
+    // Keep the most recent year's value for each wage field
+    const existing = tracker[key][wageField]
+    if (!existing || year > existing.year) {
+      tracker[key][wageField] = { value, year }
+      matchCount++
     }
   }
 
-  return { national: nationalFlat, states, msas }
-}
+  process.stdout.write(`\r  Scanned ${rowCount.toLocaleString()} rows, ${matchCount.toLocaleString()} matched.  \n`)
+  console.log(`  Most recent data year: ${maxYear}`)
 
-// ── Guess year from filename ──────────────────────────────────────────────────
-function guessYear(filePath) {
-  const m = filePath.match(/20(\d{2})/)
-  return m ? `20${m[1]}` : 'unknown'
+  // ── Organize into national / states / msas ──────────────────────────────
+  const national = {}
+  const states   = {}
+  const msas     = {}
+
+  for (const entry of Object.values(tracker)) {
+    const { areaType, areaCode, soc } = entry
+    const e = entry.entry?.value
+    const a = entry.average?.value
+    const x = entry.experienced?.value
+    if (!e || !a || !x) continue  // skip if any wage level is missing
+
+    const wages = { entry: e, average: a, experienced: x }
+
+    if (areaType === 'N') {
+      national[soc] = wages
+    } else if (areaType === 'S') {
+      const fips = areaCode.slice(0, 2)   // '0100000' → '01'
+      if (!states[fips]) states[fips] = {}
+      states[fips][soc] = wages
+    } else if (areaType === 'M') {
+      const cbsa = areaCode.slice(2)      // '0031080' → '31080'
+      if (!msas[cbsa]) msas[cbsa] = {}
+      msas[cbsa][soc] = wages
+    }
+  }
+
+  return { national, states, msas, year: String(maxYear) }
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
-  console.log('BLS OEWS Wage Data Processor')
+  console.log('BLS OES Wage Data Fetcher')
+  console.log('Source: download.bls.gov/pub/time.series/oe/')
   console.log('─'.repeat(50))
 
-  const socCodes = loadSocCodes()
+  if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true })
+
+  const socCodes  = loadSocCodes()
   console.log(`SOC codes in occupations.js: ${socCodes.size}`)
 
-  console.log('\nLocating data file in .bls-cache/ ...')
-  const fileInfo = findDataFile()
-  const year     = guessYear(fileInfo.path)
-  console.log(`  Data year: ${year}`)
+  // Build fast lookup: '111011' → '11-1011'
+  const socLookup = new Map([...socCodes].map(s => [s.replace('-', ''), s]))
 
-  console.log('\nStreaming and parsing data...')
-  const stream = await getReadStream(fileInfo)
-  const { national, states, msas } = await parseTsv(stream, socCodes)
+  console.log()
+
+  // Ensure data file is cached
+  const dataPath = resolve(CACHE_DIR, DATA_FILE)
+  if (existsSync(dataPath)) {
+    const mb = (readFileSync(dataPath).length / 1024 / 1024).toFixed(0)
+    console.log(`  Using cached ${DATA_FILE} (${mb} MB)`)
+    console.log(`  (Delete .bls-cache/${DATA_FILE} to re-download)`)
+  } else {
+    await download(DATA_URL, dataPath)
+  }
+
+  console.log()
+  console.log('Streaming and parsing wage data...')
+  const { national, states, msas, year } = await parseDataFile(dataPath, socLookup)
 
   const natCount   = Object.keys(national).length
   const stateCount = Object.keys(states).length
   const msaCount   = Object.keys(msas).length
 
-  console.log(`\n  National occupations: ${natCount}`)
+  console.log()
+  console.log(`  National occupations: ${natCount}`)
   console.log(`  States with data:     ${stateCount}`)
   console.log(`  MSAs with data:       ${msaCount}`)
 
   if (natCount === 0) {
-    console.warn('\n  ⚠ No national data found.')
-    console.warn('  The file may use different AREA_TYPE codes than expected (U or N).')
-    console.warn('  Check the "Skipped AREA_TYPE values" line above for clues.')
+    console.error('\n  ✗ No national data found — something may be wrong.')
+    console.error('  Expected series IDs like: OEUN0000000000000111011XX')
+    console.error('  Check that oe.data.0.Current downloaded correctly.')
+    process.exit(1)
   }
 
   const output = { national, states, msas, year }
   writeFileSync(OUTPUT, JSON.stringify(output, null, 2))
-  const bytes = readFileSync(OUTPUT).length
-  console.log(`\n✓ Written to api/blsWages.json`)
-  console.log(`  File size: ${(bytes / 1024).toFixed(0)} KB (${(bytes / 1024 / 1024).toFixed(2)} MB)`)
 
-  console.log('\nNext steps:')
+  const bytes = readFileSync(OUTPUT).length
+  console.log()
+  console.log(`✓ Written to api/blsWages.json`)
+  console.log(`  Data year: ${year}`)
+  console.log(`  File size: ${(bytes / 1024).toFixed(0)} KB  (${(bytes / 1024 / 1024).toFixed(2)} MB)`)
+  console.log()
+  console.log('Next steps:')
   console.log('  git add api/blsWages.json')
-  console.log('  git commit -m "Add BLS OEWS ' + year + ' wage data (national/state/MSA)"')
+  console.log(`  git commit -m "Add BLS OES wage data (${year})"`)
   console.log('  git push')
 }
 
