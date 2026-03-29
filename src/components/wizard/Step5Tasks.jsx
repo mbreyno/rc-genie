@@ -4,16 +4,12 @@ import { CATEGORIES, getOccupationsForCategory, PROFICIENCY_LEVELS } from '../..
 const CATEGORY_ORDER = ['marketing', 'finance', 'hr', 'management', 'myBusiness']
 
 // Fetch location-adjusted wages from BLS API and apply to task selections.
-// Falls back to existing static wage if the API has no data for a given SOC.
+// Falls back to a state-level wage ratio when occupation-specific data is unavailable.
 async function fetchAndApplyLiveWages(data) {
   const allTasks = CATEGORY_ORDER.flatMap(catId => data.taskSelections[catId] ?? [])
   const socCodes = [...new Set(allTasks.map(t => t.soc).filter(Boolean))]
 
-  console.log('[BLS] stateFips:', data.stateFips, '| msaCode:', data.msaCode)
-  console.log('[BLS] SOC codes to fetch:', socCodes)
-
-  if (!socCodes.length) { console.warn('[BLS] No SOC codes — skipping'); return data.taskSelections }
-  if (!data.stateFips)  { console.warn('[BLS] No stateFips — skipping'); return data.taskSelections }
+  if (!socCodes.length || !data.stateFips) return data.taskSelections
 
   try {
     const res = await fetch('/api/bls-wages', {
@@ -26,36 +22,40 @@ async function fetchAndApplyLiveWages(data) {
       }),
     })
 
-    console.log('[BLS] Response status:', res.status)
-    if (!res.ok) {
-      const text = await res.text()
-      console.error('[BLS] API error response:', text)
-      return data.taskSelections
-    }
+    if (!res.ok) return data.taskSelections
 
     const json = await res.json()
-    console.log('[BLS] Response:', json)
 
-    const { wages } = json
-    if (!wages || !Object.keys(wages).length) {
-      console.warn('[BLS] No wages returned — using fallback data')
-      return data.taskSelections
+    // ── Case 1: occupation-specific wages returned (MSA or state series) ──
+    if (json.wages && Object.keys(json.wages).length > 0) {
+      const updated = {}
+      for (const catId of CATEGORY_ORDER) {
+        updated[catId] = (data.taskSelections[catId] ?? []).map(task => {
+          const liveWage = json.wages[task.soc]?.[task.proficiency]
+          return liveWage
+            ? { ...task, hourlyWage: liveWage, wageSource: 'live' }
+            : task
+        })
+      }
+      return updated
     }
 
-    // Apply live wages to each task, falling back to existing wage if not found
-    const updated = {}
-    for (const catId of CATEGORY_ORDER) {
-      updated[catId] = (data.taskSelections[catId] ?? []).map(task => {
-        const liveWage = wages[task.soc]?.[task.proficiency]
-        console.log(`[BLS] ${task.title} (${task.soc}) ${task.proficiency}: ${liveWage ?? 'no data, using fallback'}`)
-        return liveWage
-          ? { ...task, hourlyWage: liveWage, wageSource: 'live' }
-          : { ...task, wageSource: 'fallback' }
-      })
+    // ── Case 2: state wage ratio fallback ─────────────────────────────────
+    if (json.stateRatio) {
+      const ratio = json.stateRatio
+      const updated = {}
+      for (const catId of CATEGORY_ORDER) {
+        updated[catId] = (data.taskSelections[catId] ?? []).map(task => ({
+          ...task,
+          hourlyWage: parseFloat((task.hourlyWage * ratio).toFixed(2)),
+          wageSource: 'state-adjusted',
+        }))
+      }
+      return updated
     }
-    return updated
-  } catch (err) {
-    console.error('[BLS] Fetch threw an error:', err)
+
+    return data.taskSelections
+  } catch {
     return data.taskSelections
   }
 }
@@ -97,12 +97,16 @@ export default function Step5Tasks({ data, updateData, next, prev }) {
   }
 
   function updateProficiency(catId, occId, proficiency) {
-    const updated = getSelectedTasks(catId).map(t =>
-      t.occupationId === occId
-        ? { ...t, proficiency, hourlyWage: getOccupationsForCategory(catId, data.industryId)
-            .find(o => o.id === occId)?.wages[proficiency] ?? t.hourlyWage }
-        : t
-    )
+    const updated = getSelectedTasks(catId).map(t => {
+      if (t.occupationId !== occId) return t
+      const occ = getOccupationsForCategory(catId, data.industryId).find(o => o.id === occId)
+      const baseWage = occ?.wages[proficiency] ?? t.hourlyWage
+      // Preserve state wage ratio when switching proficiency
+      const hourlyWage = (t.wageSource === 'state-adjusted' && occ?.wages[t.proficiency])
+        ? parseFloat((baseWage * (t.hourlyWage / occ.wages[t.proficiency])).toFixed(2))
+        : baseWage
+      return { ...t, proficiency, hourlyWage, wageSource: t.wageSource }
+    })
     updateData({ taskSelections: { ...data.taskSelections, [catId]: updated } })
   }
 
@@ -239,12 +243,14 @@ export default function Step5Tasks({ data, updateData, next, prev }) {
                               >
                                 {lvl.label}
                                 <div className="font-semibold">
-                                  ${(task.proficiency === lvl.value && task.wageSource === 'live'
+                                  ${(task.proficiency === lvl.value && (task.wageSource === 'live' || task.wageSource === 'state-adjusted')
                                     ? task.hourlyWage
-                                    : occ.wages[lvl.value]
+                                    : task.wageSource === 'state-adjusted'
+                                      ? parseFloat((occ.wages[lvl.value] * (task.hourlyWage / occ.wages[task.proficiency])).toFixed(2))
+                                      : occ.wages[lvl.value]
                                   ).toFixed(2)}/hr
                                 </div>
-                                {task.proficiency === lvl.value && task.wageSource === 'live' && (
+                                {task.proficiency === lvl.value && (task.wageSource === 'live' || task.wageSource === 'state-adjusted') && (
                                   <div className="text-[10px] opacity-80">location-adjusted</div>
                                 )}
                               </button>
