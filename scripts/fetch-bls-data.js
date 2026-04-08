@@ -12,8 +12,13 @@
  *
  * Wages extracted (all hourly):
  *   entry       = datatype 07 (hourly 25th percentile)
- *   average     = datatype 03 (hourly mean)
+ *   average     = datatype 08 (hourly median / 50th percentile)
  *   experienced = datatype 09 (hourly 75th percentile)
+ *   rse         = datatype 05 (relative standard error — data quality flag)
+ *
+ * Note: We use the median (08) rather than the mean (03) for "average" because the
+ * mean is skewed by high earners in commission-heavy occupations (e.g. financial
+ * advisors, brokers). The median is more representative of actual replacement cost.
  *
  * Series ID format (25 chars):
  *   OE + U + [area_type:1] + [area_code:7] + [industry:6] + [soc:6] + [datatype:2]
@@ -44,8 +49,9 @@ const DATA_FILE = 'oe.data.0.Current'
 // Hourly wage data types we extract
 const DATATYPE_MAP = {
   '07': 'entry',        // hourly 25th percentile
-  '03': 'average',      // hourly mean
+  '08': 'average',      // hourly median (50th percentile) — more stable than mean for high-variance occupations
   '09': 'experienced',  // hourly 75th percentile
+  '05': 'rse',          // relative standard error of the mean (data quality indicator; higher = less reliable)
 }
 
 // ── Load SOC codes from occupations.js ───────────────────────────────────────
@@ -192,6 +198,8 @@ async function parseDataFile(filePath, socLookup) {
     if (!e || !a || !x) continue  // skip if any wage level is missing
 
     const wages = { entry: e, average: a, experienced: x }
+    // RSE is optional — include when available (higher = less statistically reliable)
+    if (entry.rse?.value != null) wages.rse = entry.rse.value
 
     if (areaType === 'N') {
       national[soc] = wages
