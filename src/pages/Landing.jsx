@@ -110,7 +110,7 @@ export default function Landing() {
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight tracking-tight mb-6">
             Reasonable compensation,{' '}
-            <span className="text-brand-600">done right.</span>
+            <span className="text-brand-600">made simple.</span>
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
