@@ -174,20 +174,18 @@ function Page1({ report, advisor, totalCompensation, categoryTotals, totalPages 
       reportYear={report.report_year}
       pageNum={1} totalPages={totalPages}>
 
-      {/* Compensation callout — centered card */}
+      {/* Compensation callout — solid brand background */}
       <div style={{
         textAlign: 'center',
-        backgroundColor: BRAND_XL,
-        border: `1px solid #c7d2fb`,
-        borderTop: `4px solid ${BRAND}`,
-        borderRadius: '6px',
-        padding: '14px 24px',
+        backgroundColor: BRAND,
+        borderRadius: '8px',
+        padding: '16px 24px',
         marginBottom: '18px',
       }}>
-        <div style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '4px' }}>
+        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.75)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '5px' }}>
           Estimated Annual Reasonable Compensation
         </div>
-        <div style={{ fontSize: '30px', fontWeight: 700, color: BRAND, lineHeight: 1 }}>
+        <div style={{ fontSize: '32px', fontWeight: 700, color: 'white', lineHeight: 1 }}>
           {formatCurrency(totalCompensation)}
         </div>
       </div>
