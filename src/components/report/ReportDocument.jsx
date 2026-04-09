@@ -38,23 +38,23 @@ function Page({ children, logoUrl, firmName, clientName, companyName, reportYear
       {/* Full-width header band */}
       <div style={{
         backgroundColor: 'white',
-        padding: '0 48px',
+        padding: '0 56px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: '68px',
+        height: '88px',
         flexShrink: 0,
         borderBottom: `3px solid ${BRAND}`,
       }}>
         {/* Logo / firm name — full color, no filter */}
-        <div style={{ maxWidth: '160px', maxHeight: '44px' }}>
+        <div style={{ maxWidth: '180px', maxHeight: '56px' }}>
           {logoUrl
-            ? <img src={logoUrl} alt={firmName} style={{ maxWidth: '160px', maxHeight: '44px', objectFit: 'contain' }} />
-            : <div style={{ fontSize: '18px', fontWeight: 700, color: BRAND, letterSpacing: '-0.3px' }}>{firmName}</div>
+            ? <img src={logoUrl} alt={firmName} style={{ maxWidth: '180px', maxHeight: '56px', objectFit: 'contain' }} />
+            : <div style={{ fontSize: '20px', fontWeight: 700, color: BRAND, letterSpacing: '-0.3px' }}>{firmName}</div>
           }
         </div>
         {/* Metadata — dark text on white background */}
-        <div style={{ textAlign: 'right', fontSize: '11px', color: '#6b7280', lineHeight: 1.7 }}>
+        <div style={{ textAlign: 'right', fontSize: '11.5px', color: '#6b7280', lineHeight: 2.0 }}>
           <div><strong style={{ color: '#111827' }}>Year:</strong> {reportYear} &nbsp;·&nbsp; <strong style={{ color: '#111827' }}>Approach:</strong> Cost Approach</div>
           <div><strong style={{ color: '#111827' }}>Report:</strong> S-Corporation Reasonable Compensation</div>
           <div><strong style={{ color: '#111827' }}>Prepared for:</strong> {clientName} · {companyName}</div>
