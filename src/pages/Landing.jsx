@@ -83,9 +83,6 @@ export default function Landing() {
             <span className="font-bold text-gray-900 text-lg tracking-tight">RC Genie</span>
           </div>
           <div className="flex items-center gap-3">
-            <a href="mailto:support@rcgenie.app" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-              Help
-            </a>
             <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
               Sign in
             </Link>
