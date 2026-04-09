@@ -30,33 +30,34 @@ function Page({ children, logoUrl, firmName, clientName, companyName, reportYear
       display: 'flex',
       flexDirection: 'column',
       backgroundColor: 'white',
-      fontFamily: 'Georgia, "Times New Roman", serif',
+      fontFamily: 'Arial, Helvetica, sans-serif',
       fontSize: '12px',
       color: '#1a1a1a',
     }}>
 
       {/* Full-width header band */}
       <div style={{
-        backgroundColor: BRAND,
+        backgroundColor: 'white',
         padding: '0 48px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         height: '68px',
         flexShrink: 0,
+        borderBottom: `3px solid ${BRAND}`,
       }}>
-        {/* Logo / firm name */}
+        {/* Logo / firm name — full color, no filter */}
         <div style={{ maxWidth: '160px', maxHeight: '44px' }}>
           {logoUrl
-            ? <img src={logoUrl} alt={firmName} style={{ maxWidth: '160px', maxHeight: '44px', objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
-            : <div style={{ fontSize: '18px', fontWeight: 700, color: 'white', letterSpacing: '-0.3px' }}>{firmName}</div>
+            ? <img src={logoUrl} alt={firmName} style={{ maxWidth: '160px', maxHeight: '44px', objectFit: 'contain' }} />
+            : <div style={{ fontSize: '18px', fontWeight: 700, color: BRAND, letterSpacing: '-0.3px' }}>{firmName}</div>
           }
         </div>
-        {/* Metadata — white text on brand background */}
-        <div style={{ textAlign: 'right', fontSize: '11px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.7 }}>
-          <div><strong style={{ color: 'white' }}>Year:</strong> {reportYear} &nbsp;·&nbsp; <strong style={{ color: 'white' }}>Approach:</strong> Cost Approach</div>
-          <div><strong style={{ color: 'white' }}>Report:</strong> S-Corporation Reasonable Compensation</div>
-          <div><strong style={{ color: 'white' }}>Prepared for:</strong> {clientName} · {companyName}</div>
+        {/* Metadata — dark text on white background */}
+        <div style={{ textAlign: 'right', fontSize: '11px', color: '#6b7280', lineHeight: 1.7 }}>
+          <div><strong style={{ color: '#111827' }}>Year:</strong> {reportYear} &nbsp;·&nbsp; <strong style={{ color: '#111827' }}>Approach:</strong> Cost Approach</div>
+          <div><strong style={{ color: '#111827' }}>Report:</strong> S-Corporation Reasonable Compensation</div>
+          <div><strong style={{ color: '#111827' }}>Prepared for:</strong> {clientName} · {companyName}</div>
         </div>
       </div>
 
@@ -120,7 +121,7 @@ function DonutCanvas({ segments, size = 160 }) {
         const midA = startAngle + angle / 2
         const lr   = (outerR + innerR) / 2
         ctx.fillStyle    = 'white'
-        ctx.font         = `bold ${Math.round(size * 0.065)}px Georgia`
+        ctx.font         = `bold ${Math.round(size * 0.065)}px Arial`
         ctx.textAlign    = 'center'
         ctx.textBaseline = 'middle'
         ctx.fillText(`${pct}%`, cx + lr * Math.cos(midA), cy + lr * Math.sin(midA))
@@ -206,7 +207,7 @@ function Page1({ report, advisor, totalCompensation, categoryTotals, totalPages 
       </table>
 
       {/* Intro paragraphs */}
-      <p style={{ lineHeight: 1.65, marginBottom: '9px', fontFamily: 'Georgia, serif' }}>
+      <p style={{ lineHeight: 1.65, marginBottom: '9px' }}>
         <strong>{advisor.advisorName}</strong> of <strong>{advisor.firmName}</strong> has prepared this
         Reasonable Compensation analysis on your behalf. This report estimates the fair market value of
         the services you contribute to your S Corporation, based on the scope and nature of your annual
@@ -351,7 +352,7 @@ function Page5Methodology({ report, advisor, pageNum, totalPages }) {
       reportYear={report.report_year}
       pageNum={pageNum} totalPages={totalPages}>
 
-      <p style={{ fontWeight: 700, fontSize: '15px', marginBottom: '14px', color: '#111827', fontFamily: 'Georgia, serif' }}>
+      <p style={{ fontWeight: 700, fontSize: '15px', marginBottom: '14px', color: '#111827' }}>
         How Is This Compensation Figure Calculated?
       </p>
 
@@ -424,7 +425,7 @@ function Page6Considerations({ report, advisor, pageNum, totalPages }) {
       reportYear={report.report_year}
       pageNum={pageNum} totalPages={totalPages}>
 
-      <p style={{ fontWeight: 700, fontSize: '15px', marginBottom: '14px', color: '#111827', fontFamily: 'Georgia, serif' }}>
+      <p style={{ fontWeight: 700, fontSize: '15px', marginBottom: '14px', color: '#111827' }}>
         Factors That May Warrant Adjusting the Compensation Figure
       </p>
 
@@ -494,7 +495,7 @@ function TaskDescriptionPages({ report, advisor, tasks, startPage, totalPages })
   return pages.map((pageTasks, i) => (
     <Page key={i} {...pageProps} pageNum={startPage + i}>
       {i === 0 && (
-        <p style={{ fontWeight: 700, fontSize: '15px', marginBottom: '18px', color: '#111827', fontFamily: 'Georgia, serif' }}>
+        <p style={{ fontWeight: 700, fontSize: '15px', marginBottom: '18px', color: '#111827' }}>
           Appendix A &mdash; Role Descriptions
         </p>
       )}
@@ -509,7 +510,7 @@ function TaskDescriptionPages({ report, advisor, tasks, startPage, totalPages })
             <p style={{ fontWeight: 700, fontSize: '12.5px', margin: 0, color: '#111827' }}>{task.title}</p>
             <span style={{ fontSize: '10px', color: '#9ca3af', fontStyle: 'italic' }}>SOC {task.soc}</span>
           </div>
-          <p style={{ lineHeight: 1.7, color: '#4b5563', margin: 0, paddingLeft: '20px', fontFamily: 'Georgia, serif' }}>{task.description}</p>
+          <p style={{ lineHeight: 1.7, color: '#4b5563', margin: 0, paddingLeft: '20px' }}>{task.description}</p>
         </div>
       ))}
     </Page>
@@ -525,7 +526,7 @@ function Page9Minutes({ report, advisor, totalCompensation, pageNum, totalPages 
       reportYear={report.report_year}
       pageNum={pageNum} totalPages={totalPages}>
 
-      <p style={{ fontWeight: 700, fontSize: '15px', marginBottom: '12px', color: '#111827', fontFamily: 'Georgia, serif' }}>
+      <p style={{ fontWeight: 700, fontSize: '15px', marginBottom: '12px', color: '#111827' }}>
         Suggested Language for Corporate Minutes
       </p>
       <p style={{ lineHeight: 1.75, marginBottom: '20px' }}>
