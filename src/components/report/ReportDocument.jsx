@@ -13,7 +13,7 @@ import { useEffect, useRef } from 'react'
 import { CATEGORIES } from '../../data/occupations'
 import { formatCurrency } from '../../utils/calculations'
 
-const CATEGORY_ORDER = ['marketing', 'finance', 'hr', 'management', 'myBusiness']
+const CATEGORY_ORDER = ['myBusiness', 'management', 'marketing', 'finance', 'hr']
 
 const BRAND    = '#1a3de8'
 const BRAND_LT = '#eef0fd'
