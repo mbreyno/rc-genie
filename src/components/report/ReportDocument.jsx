@@ -1,5 +1,5 @@
 /**
- * Reasonable Compensation Report — original layout with light modern styling.
+ * Reasonable Compensation Report — RC Genie layout
  *
  * html2pdf pagination strategy:
  *  - Each Page div is EXACTLY 1056px tall (height, not minHeight) with overflow:hidden.
@@ -7,8 +7,7 @@
  *  - No pageBreakBefore/pageBreakAfter needed; exact height IS the page break.
  *  - Footer is a flex item (not position:absolute) so it stays inside the 1056px boundary.
  *  - Outer container has NO padding — any top offset shifts all pages out of alignment.
- *  - Charts use <canvas> + useEffect so html2canvas copies pixel data directly —
- *    no SVG arc interpretation, no clipping of small segments.
+ *  - Charts use <canvas> + useEffect so html2canvas copies pixel data directly.
  */
 import { useEffect, useRef } from 'react'
 import { CATEGORIES } from '../../data/occupations'
@@ -16,82 +15,79 @@ import { formatCurrency } from '../../utils/calculations'
 
 const CATEGORY_ORDER = ['marketing', 'finance', 'hr', 'management', 'myBusiness']
 
-// Brand blue used as accent throughout
-const BRAND   = '#1a3de8'
-const BRAND_LT = '#eef0fd'   // light tint for table headers / backgrounds
-const BRAND_XL = '#f5f6fe'   // very light for alternating rows
+const BRAND    = '#1a3de8'
+const BRAND_LT = '#eef0fd'
+const BRAND_XL = '#f5f6fe'
 
-// ─── Page wrapper ────────────────────────────────────────────────────────────
+// ─── Page wrapper ─────────────────────────────────────────────────────────────
 function Page({ children, logoUrl, firmName, clientName, companyName, reportYear, pageNum, totalPages }) {
   return (
     <div style={{
       width: '816px',
-      height: '1056px',       // EXACT — html2pdf slices every 1056px; must match precisely
-      overflow: 'hidden',     // clip any accidental overflow so nothing bleeds into the next page
+      height: '1056px',
+      overflow: 'hidden',
       boxSizing: 'border-box',
       display: 'flex',
       flexDirection: 'column',
       backgroundColor: 'white',
-      fontFamily: 'Verdana, Geneva, sans-serif',
+      fontFamily: 'Georgia, "Times New Roman", serif',
       fontSize: '12px',
       color: '#1a1a1a',
-      // No pageBreak properties — exact height handles natural PDF pagination
     }}>
 
-      {/* Thin brand-blue accent strip at top */}
-      <div style={{ height: '4px', backgroundColor: BRAND, flexShrink: 0 }} />
-
-      {/* Header */}
+      {/* Full-width header band */}
       <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        padding: '16px 64px 16px',
-        borderBottom: '1px solid #e5e7eb', flexShrink: 0,
+        backgroundColor: BRAND,
+        padding: '0 48px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: '68px',
+        flexShrink: 0,
       }}>
-        {/* Logo */}
-        <div style={{ maxWidth: '140px', maxHeight: '50px' }}>
+        {/* Logo / firm name */}
+        <div style={{ maxWidth: '160px', maxHeight: '44px' }}>
           {logoUrl
-            ? <img src={logoUrl} alt={firmName} style={{ maxWidth: '140px', maxHeight: '50px', objectFit: 'contain' }} />
-            : <div style={{ fontSize: '17px', fontWeight: 700, color: BRAND }}>{firmName}</div>
+            ? <img src={logoUrl} alt={firmName} style={{ maxWidth: '160px', maxHeight: '44px', objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
+            : <div style={{ fontSize: '18px', fontWeight: 700, color: 'white', letterSpacing: '-0.3px' }}>{firmName}</div>
           }
         </div>
-        {/* Metadata box — light blue tint instead of plain border */}
-        <div style={{
-          border: `1px solid #c7d2fb`,
-          backgroundColor: BRAND_XL,
-          borderRadius: '6px', padding: '10px 14px', fontSize: '12px', minWidth: '260px',
-        }}>
-          <div><strong>Year:</strong> {reportYear}</div>
-          <div style={{ marginTop: '3px' }}><strong>Report:</strong> Tax Compliance for S Corp</div>
-          <div style={{ marginTop: '3px' }}><strong>Approach:</strong> Cost Approach</div>
-          <div style={{ marginTop: '3px' }}><strong>For:</strong> {clientName} of {companyName}</div>
+        {/* Metadata — white text on brand background */}
+        <div style={{ textAlign: 'right', fontSize: '11px', color: 'rgba(255,255,255,0.85)', lineHeight: 1.7 }}>
+          <div><strong style={{ color: 'white' }}>Year:</strong> {reportYear} &nbsp;·&nbsp; <strong style={{ color: 'white' }}>Approach:</strong> Cost Approach</div>
+          <div><strong style={{ color: 'white' }}>Report:</strong> S-Corporation Reasonable Compensation</div>
+          <div><strong style={{ color: 'white' }}>Prepared for:</strong> {clientName} · {companyName}</div>
         </div>
       </div>
 
-      {/* Body — flex: 1 fills remaining space between header and footer */}
-      <div style={{ flex: 1, padding: '32px 64px 24px', overflow: 'hidden' }}>{children}</div>
+      {/* Body */}
+      <div style={{ flex: 1, padding: '28px 48px 20px', overflow: 'hidden' }}>{children}</div>
 
-      {/* Footer — flex item (NOT position:absolute) so it stays within the 1056px boundary */}
+      {/* Footer */}
       <div style={{
         flexShrink: 0,
-        padding: '8px 64px 10px',
-        borderTop: '1px solid #e5e7eb',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        backgroundColor: 'white', fontSize: '10px',
+        padding: '7px 48px',
+        borderTop: `2px solid ${BRAND}`,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: BRAND_XL,
+        fontSize: '9.5px',
+        color: '#6b7280',
       }}>
-        <span style={{ color: '#9ca3af' }}>
-          Annual Salary and Reasonable Compensation are used interchangeably in this report. All salary and Reasonable Compensation figures are expressed annually and in U.S. dollars.
+        <span>
+          All compensation figures in this report are expressed as annual amounts in U.S. dollars.
+          "Annual Salary" and "Reasonable Compensation" are used interchangeably throughout.
         </span>
-        <span style={{ color: BRAND, fontWeight: 700, whiteSpace: 'nowrap', marginLeft: '16px' }}>
-          Page {pageNum} of {totalPages}
+        <span style={{ color: BRAND, fontWeight: 700, whiteSpace: 'nowrap', marginLeft: '16px', fontSize: '10px' }}>
+          {pageNum} / {totalPages}
         </span>
       </div>
     </div>
   )
 }
 
-// ─── Donut chart (Canvas) ────────────────────────────────────────────────────
-// Uses <canvas> + useEffect so html2canvas copies pixel data directly —
-// no SVG arc interpretation, no clipping of small segments.
+// ─── Donut chart ──────────────────────────────────────────────────────────────
 function DonutCanvas({ segments, size = 160 }) {
   const ref = useRef(null)
   const total = segments.reduce((s, g) => s + g.value, 0) || 1
@@ -100,172 +96,166 @@ function DonutCanvas({ segments, size = 160 }) {
     const canvas = ref.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
-
-    // Retina-sharp: scale by devicePixelRatio
     const dpr = window.devicePixelRatio || 1
     canvas.width  = size * dpr
     canvas.height = size * dpr
     ctx.scale(dpr, dpr)
 
     const cx = size / 2, cy = size / 2
-    const outerR = size * 0.42   // outer ring radius
-    const innerR = size * 0.26   // inner hole radius
+    const outerR = size * 0.42
+    const innerR = size * 0.26
 
     let startAngle = -Math.PI / 2
-
     for (const seg of segments) {
-      const angle = (seg.value / total) * 2 * Math.PI
+      const angle    = (seg.value / total) * 2 * Math.PI
       const endAngle = startAngle + angle
-
-      // Draw filled annular sector (outer arc → inner arc reversed → close)
       ctx.beginPath()
       ctx.arc(cx, cy, outerR, startAngle, endAngle)
       ctx.arc(cx, cy, innerR, endAngle, startAngle, true)
       ctx.closePath()
       ctx.fillStyle = seg.color
       ctx.fill()
-
-      // Percentage label inside the ring
       const pct = Math.round(seg.value / total * 100)
       if (pct >= 5) {
         const midA = startAngle + angle / 2
         const lr   = (outerR + innerR) / 2
         ctx.fillStyle    = 'white'
-        ctx.font         = `bold ${Math.round(size * 0.065)}px Verdana`
+        ctx.font         = `bold ${Math.round(size * 0.065)}px Georgia`
         ctx.textAlign    = 'center'
         ctx.textBaseline = 'middle'
         ctx.fillText(`${pct}%`, cx + lr * Math.cos(midA), cy + lr * Math.sin(midA))
       }
-
       startAngle = endAngle
     }
   }, [segments, size, total])
 
   return (
-    <canvas
-      ref={ref}
-      width={size}
-      height={size}
-      style={{ display: 'block', margin: '0 auto', width: size + 'px', height: size + 'px' }}
-    />
+    <canvas ref={ref} width={size} height={size}
+      style={{ display: 'block', margin: '0 auto', width: size + 'px', height: size + 'px' }} />
   )
 }
 
 function ChartWithLegend({ title, segments }) {
   return (
     <div style={{ textAlign: 'center' }}>
-      <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: '10px', color: '#1f2937' }}>{title}</div>
-      {/* Legend */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '4px 10px', marginBottom: '8px' }}>
+      <div style={{ fontWeight: 700, fontSize: '12px', marginBottom: '8px', color: BRAND, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{title}</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '3px 8px', marginBottom: '8px' }}>
         {segments.map((seg, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
-            <div style={{ width: '9px', height: '9px', backgroundColor: seg.color, borderRadius: '2px' }} />
-            <span>{seg.label}</span>
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10.5px' }}>
+            <div style={{ width: '8px', height: '8px', backgroundColor: seg.color, borderRadius: '50%' }} />
+            <span style={{ color: '#4b5563' }}>{seg.label}</span>
           </div>
         ))}
       </div>
-      <DonutCanvas segments={segments} size={160} />
+      <DonutCanvas segments={segments} size={155} />
     </div>
   )
 }
 
-// How many task categories to show per breakdown page.
-// 3 fills pages nicely for typical reports (1–3 tasks per category).
 const CATS_PER_PAGE = 3
 
-// ─── Page 1: Cover / Summary ─────────────────────────────────────────────────
+// ─── Page 1: Cover ───────────────────────────────────────────────────────────
 function Page1({ report, advisor, totalCompensation, categoryTotals, totalPages }) {
   const timeSegments = CATEGORY_ORDER
     .filter(id => categoryTotals[id])
     .map(id => ({ label: CATEGORIES[id].label, value: categoryTotals[id].pctOfTotal, color: CATEGORIES[id].color }))
-
   const compSegments = CATEGORY_ORDER
     .filter(id => categoryTotals[id])
     .map(id => ({ label: CATEGORIES[id].label, value: categoryTotals[id].pctOfCompensation, color: CATEGORIES[id].color }))
 
-  const dateStr = new Date().toISOString().split('T')[0]
+  const dateStr  = new Date().toISOString().split('T')[0]
   const location = report.msa_name ? `${report.msa_name}, ${report.state_name}` : report.state_name
 
-  const pageProps = {
-    ...advisor,
-    clientName: `${report.client_first_name} ${report.client_last_name}`,
-    companyName: report.company_name,
-    reportYear: report.report_year,
-    pageNum: 1, totalPages,
-  }
-
   return (
-    <Page {...pageProps}>
-      {/* Compensation figure — subtle accent bar on the left */}
-      <div style={{ borderLeft: `4px solid ${BRAND}`, paddingLeft: '12px', marginBottom: '16px' }}>
-        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '2px' }}>
-          Your estimated annual Reasonable Compensation
+    <Page {...advisor}
+      clientName={`${report.client_first_name} ${report.client_last_name}`}
+      companyName={report.company_name}
+      reportYear={report.report_year}
+      pageNum={1} totalPages={totalPages}>
+
+      {/* Compensation callout — centered card */}
+      <div style={{
+        textAlign: 'center',
+        backgroundColor: BRAND_XL,
+        border: `1px solid #c7d2fb`,
+        borderTop: `4px solid ${BRAND}`,
+        borderRadius: '6px',
+        padding: '14px 24px',
+        marginBottom: '18px',
+      }}>
+        <div style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '4px' }}>
+          Estimated Annual Reasonable Compensation
         </div>
-        <div style={{ fontSize: '28px', fontWeight: 700, color: BRAND, lineHeight: 1.1 }}>
+        <div style={{ fontSize: '30px', fontWeight: 700, color: BRAND, lineHeight: 1 }}>
           {formatCurrency(totalCompensation)}
         </div>
       </div>
 
-      <p style={{ lineHeight: 1.65, marginBottom: '11px' }}>
-        Thank you for entrusting <strong>{advisor.advisorName}</strong> of{' '}
-        <strong>{advisor.firmName}</strong> with your Reasonable Compensation analysis. This report
-        provides a reasonable estimate of the value of services rendered to your S Corporation based
-        on the duties and responsibilities that you perform annually. Reasonable Compensation is
-        defined by the IRS as &ldquo;The value that would ordinarily be paid for like services by like
-        enterprises under like circumstances.&rdquo;
-      </p>
-      <p style={{ lineHeight: 1.65, marginBottom: '11px' }}>
-        The calculated salary of <strong>{formatCurrency(totalCompensation)}</strong> was determined
-        to be Reasonable Compensation based on the type of work performed, the skill level of the
-        work performed and the number of hours the work is performed annually. You told us that you
-        work <strong>{report.hours_worked.toLocaleString()}</strong> hours per year in{' '}
-        <strong>{location}</strong>. Our analysis indicates the annual salary of{' '}
-        <strong>{formatCurrency(totalCompensation)}</strong> would be a reasonable cost to hire
-        employee(s) to perform the duties and responsibilities that you currently perform.
-      </p>
-      <p style={{ lineHeight: 1.65, marginBottom: '20px' }}>
-        {advisor.firmName} recommends completing a Reasonable Compensation report annually.
-      </p>
-
-      {/* Charts — table layout avoids the flex/SVG clipping issue in html2pdf */}
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
+      {/* Charts — appear before text on this layout */}
+      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '18px' }}>
         <tbody>
           <tr>
-            <td style={{ width: '50%', textAlign: 'center', verticalAlign: 'top', padding: '0 16px 0 0' }}>
-              <ChartWithLegend title="Your Time" segments={timeSegments} />
+            <td style={{ width: '50%', textAlign: 'center', verticalAlign: 'top', padding: '0 12px 0 0' }}>
+              <ChartWithLegend title="Time Allocation" segments={timeSegments} />
             </td>
-            <td style={{ width: '50%', textAlign: 'center', verticalAlign: 'top', padding: '0 0 0 16px' }}>
-              <ChartWithLegend title="Your Compensation" segments={compSegments} />
+            <td style={{ width: '50%', textAlign: 'center', verticalAlign: 'top', padding: '0 0 0 12px' }}>
+              <ChartWithLegend title="Compensation Allocation" segments={compSegments} />
             </td>
           </tr>
         </tbody>
       </table>
 
-      {/* Business Summary — compact info row below charts */}
-      <div style={{
-        borderTop: '1px solid #e5e7eb',
-        paddingTop: '14px',
-        backgroundColor: BRAND_XL,
-        borderRadius: '6px',
-        padding: '12px 16px',
-        marginTop: '4px',
-      }}>
-        <div style={{ fontSize: '11px', fontWeight: 700, color: BRAND, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      {/* Intro paragraphs */}
+      <p style={{ lineHeight: 1.65, marginBottom: '9px', fontFamily: 'Georgia, serif' }}>
+        <strong>{advisor.advisorName}</strong> of <strong>{advisor.firmName}</strong> has prepared this
+        Reasonable Compensation analysis on your behalf. This report estimates the fair market value of
+        the services you contribute to your S Corporation, based on the scope and nature of your annual
+        duties. Per IRS guidance, Reasonable Compensation is &ldquo;the value that would ordinarily be paid
+        for like services by like enterprises under like circumstances.&rdquo;
+      </p>
+      <p style={{ lineHeight: 1.65, marginBottom: '9px' }}>
+        The annual compensation figure of <strong>{formatCurrency(totalCompensation)}</strong> reflects
+        the type of work you perform, your skill and experience level, and the volume of hours you
+        dedicate to those duties each year. Based on your input of{' '}
+        <strong>{report.hours_worked.toLocaleString()} hours per year</strong> in{' '}
+        <strong>{location}</strong>, this figure represents a reasonable cost to engage qualified
+        workers to carry out the same responsibilities you currently handle.
+      </p>
+      <p style={{ lineHeight: 1.65, marginBottom: '16px' }}>
+        {advisor.firmName} recommends refreshing this analysis each year to keep pace with current
+        wage data and any changes in your duties.
+      </p>
+
+      {/* Report details — simple two-column grid */}
+      <div style={{ borderTop: `1px solid #e5e7eb`, paddingTop: '12px' }}>
+        <div style={{ fontSize: '10px', fontWeight: 700, color: BRAND, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }}>
           Report Details
         </div>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11.5px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
           <tbody>
             <tr>
-              <td style={{ padding: '2px 0', width: '50%' }}><span style={{ color: '#6b7280' }}>Client: </span><strong>{report.client_first_name} {report.client_last_name}</strong></td>
-              <td style={{ padding: '2px 0', width: '50%' }}><span style={{ color: '#6b7280' }}>Company: </span><strong>{report.company_name}</strong></td>
+              <td style={{ padding: '2px 0', width: '50%', color: '#374151' }}>
+                <span style={{ color: '#9ca3af' }}>Client: </span><strong>{report.client_first_name} {report.client_last_name}</strong>
+              </td>
+              <td style={{ padding: '2px 0', width: '50%', color: '#374151' }}>
+                <span style={{ color: '#9ca3af' }}>Company: </span><strong>{report.company_name}</strong>
+              </td>
             </tr>
             <tr>
-              <td style={{ padding: '2px 0' }}><span style={{ color: '#6b7280' }}>Location: </span><strong>{location}</strong></td>
-              <td style={{ padding: '2px 0' }}><span style={{ color: '#6b7280' }}>Hours Worked: </span><strong>{report.hours_worked.toLocaleString()}</strong></td>
+              <td style={{ padding: '2px 0', color: '#374151' }}>
+                <span style={{ color: '#9ca3af' }}>Location: </span><strong>{location}</strong>
+              </td>
+              <td style={{ padding: '2px 0', color: '#374151' }}>
+                <span style={{ color: '#9ca3af' }}>Annual Hours: </span><strong>{report.hours_worked.toLocaleString()}</strong>
+              </td>
             </tr>
             <tr>
-              <td style={{ padding: '2px 0' }}><span style={{ color: '#6b7280' }}>Report Year: </span><strong>{report.report_year}</strong></td>
-              <td style={{ padding: '2px 0' }}><span style={{ color: '#6b7280' }}>Report Finalized: </span><strong>{dateStr}</strong></td>
+              <td style={{ padding: '2px 0', color: '#374151' }}>
+                <span style={{ color: '#9ca3af' }}>Tax Year: </span><strong>{report.report_year}</strong>
+              </td>
+              <td style={{ padding: '2px 0', color: '#374151' }}>
+                <span style={{ color: '#9ca3af' }}>Date Completed: </span><strong>{dateStr}</strong>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -274,7 +264,7 @@ function Page1({ report, advisor, totalCompensation, categoryTotals, totalPages 
   )
 }
 
-// ─── Pages 2+: Task Breakdowns ───────────────────────────────────────────────
+// ─── Pages 2+: Task Breakdowns ────────────────────────────────────────────────
 function TaskBreakdownPages({ report, advisor, tasks, categoryTotals, startPage, totalPages }) {
   const tasksByCategory = {}
   for (const task of tasks) {
@@ -291,7 +281,7 @@ function TaskBreakdownPages({ report, advisor, tasks, categoryTotals, startPage,
   }
 
   const catList = CATEGORY_ORDER.filter(id => tasksByCategory[id])
-  const pages = []
+  const pages   = []
   for (let i = 0; i < catList.length; i += CATS_PER_PAGE) pages.push(catList.slice(i, i + CATS_PER_PAGE))
 
   return pages.map((catIds, pageIdx) => (
@@ -300,40 +290,47 @@ function TaskBreakdownPages({ report, advisor, tasks, categoryTotals, startPage,
         const cat      = CATEGORIES[catId]
         const catTot   = categoryTotals[catId]
         const catTasks = tasksByCategory[catId] ?? []
+        const catColor = cat.color ?? BRAND
         return (
-          <div key={catId} style={{ marginBottom: '28px' }}>
-            {/* Category header — brand blue */}
-            <div style={{ backgroundColor: BRAND, color: 'white', padding: '8px 12px', borderRadius: '4px 4px 0 0' }}>
-              <strong style={{ fontSize: '14px' }}>{cat.label}</strong>
-            </div>
-            <div style={{ backgroundColor: BRAND_LT, padding: '5px 12px', borderBottom: '1px solid #c7d2fb', fontSize: '11px', color: '#4b5563' }}>
-              {catTot?.pctOfTotal}% of total hours &nbsp;|&nbsp; {catTot?.hoursPerYear.toLocaleString()} hours per year &nbsp;|&nbsp; {catTot?.pctOfCompensation}% of total compensation
+          <div key={catId} style={{ marginBottom: '26px' }}>
+            {/* Category header — uses each category's own color */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              borderLeft: `5px solid ${catColor}`,
+              paddingLeft: '10px', marginBottom: '4px',
+            }}>
+              <strong style={{ fontSize: '13px', color: '#111827' }}>{cat.label}</strong>
+              <span style={{ fontSize: '10.5px', color: '#6b7280' }}>
+                {catTot?.pctOfTotal}% of time &nbsp;·&nbsp; {catTot?.hoursPerYear.toLocaleString()} hrs/yr &nbsp;·&nbsp; {catTot?.pctOfCompensation}% of compensation
+              </span>
             </div>
 
             {/* Table */}
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11.5px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
               <thead>
-                <tr style={{ backgroundColor: BRAND_LT }}>
-                  {['Task', 'Proficiency', '% of Category', '% of Total Hours', 'Hours per Year', 'Hourly Wage', 'Annual Wage'].map(h => (
+                <tr style={{ backgroundColor: '#1f2937' }}>
+                  {['Task', 'Proficiency', '% of Category', '% of Total Hours', 'Hours / Year', 'Hourly Rate', 'Annual Total'].map(h => (
                     <th key={h} style={{
-                      padding: '6px 10px',
+                      padding: '6px 9px',
                       textAlign: (h === 'Task' || h === 'Proficiency') ? 'left' : 'right',
-                      fontWeight: 700, color: BRAND, fontSize: '11px',
-                      borderBottom: `1px solid #c7d2fb`,
+                      fontWeight: 600, color: 'white', fontSize: '10.5px',
                     }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {catTasks.map((task, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid #f3f4f6', backgroundColor: i % 2 === 0 ? 'white' : BRAND_XL }}>
-                    <td style={{ padding: '7px 10px' }}>{task.title}</td>
-                    <td style={{ padding: '7px 10px', textTransform: 'capitalize' }}>{task.proficiency}</td>
-                    <td style={{ padding: '7px 10px', textAlign: 'right' }}>{task.pctOfCategory}%</td>
-                    <td style={{ padding: '7px 10px', textAlign: 'right' }}>{task.pctOfTotal}%</td>
-                    <td style={{ padding: '7px 10px', textAlign: 'right' }}>{task.hoursPerYear.toLocaleString()}</td>
-                    <td style={{ padding: '7px 10px', textAlign: 'right' }}>${task.hourlyWage.toFixed(2)}</td>
-                    <td style={{ padding: '7px 10px', textAlign: 'right', fontWeight: 700 }}>{formatCurrency(task.annualWage)}</td>
+                  <tr key={i} style={{
+                    borderBottom: '1px solid #e5e7eb',
+                    backgroundColor: i % 2 === 0 ? 'white' : '#f9fafb',
+                  }}>
+                    <td style={{ padding: '6px 9px' }}>{task.title}</td>
+                    <td style={{ padding: '6px 9px', textTransform: 'capitalize', color: '#4b5563' }}>{task.proficiency}</td>
+                    <td style={{ padding: '6px 9px', textAlign: 'right' }}>{task.pctOfCategory}%</td>
+                    <td style={{ padding: '6px 9px', textAlign: 'right' }}>{task.pctOfTotal}%</td>
+                    <td style={{ padding: '6px 9px', textAlign: 'right' }}>{task.hoursPerYear.toLocaleString()}</td>
+                    <td style={{ padding: '6px 9px', textAlign: 'right' }}>${task.hourlyWage.toFixed(2)}</td>
+                    <td style={{ padding: '6px 9px', textAlign: 'right', fontWeight: 700, color: BRAND }}>{formatCurrency(task.annualWage)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -345,122 +342,138 @@ function TaskBreakdownPages({ report, advisor, tasks, categoryTotals, startPage,
   ))
 }
 
-// ─── Methodology ─────────────────────────────────────────────────────────────
+// ─── Methodology ──────────────────────────────────────────────────────────────
 function Page5Methodology({ report, advisor, pageNum, totalPages }) {
-  const pageProps = {
-    ...advisor,
-    clientName: `${report.client_first_name} ${report.client_last_name}`,
-    companyName: report.company_name,
-    reportYear: report.report_year,
-    pageNum, totalPages,
-  }
   return (
-    <Page {...pageProps}>
-      <p style={{ fontWeight: 700, fontSize: '14px', marginBottom: '12px' }}>How was my &ldquo;Annual Salary&rdquo; or &ldquo;Reasonable Compensation&rdquo; calculated?</p>
-      <p style={{ lineHeight: 1.7, marginBottom: '10px' }}>
-        {advisor.firmName} relies on data provided by Bureau of Labor Statistics (BLS) and U.S. Census
-        data to calculate a concise, independent, unbiased, Reasonable Compensation figure.
+    <Page {...advisor}
+      clientName={`${report.client_first_name} ${report.client_last_name}`}
+      companyName={report.company_name}
+      reportYear={report.report_year}
+      pageNum={pageNum} totalPages={totalPages}>
+
+      <p style={{ fontWeight: 700, fontSize: '15px', marginBottom: '14px', color: '#111827', fontFamily: 'Georgia, serif' }}>
+        How Is This Compensation Figure Calculated?
       </p>
-      <p style={{ lineHeight: 1.7, marginBottom: '10px' }}>
-        The Bureau of Labor Statistics defines &ldquo;year-round, full-time&rdquo; employment as 2,080 hours per
-        year (40 hours per week). The BLS definition is adhered to by the Court and IRS Expert in{' '}
-        <em>McAlary v. IRS</em>. If you selected 40+ hours per week your Reasonable Compensation
-        figure will reflect a reasonable salary for someone working year-round, full-time, even if you
-        work more than 40 hours per week.
+
+      <p style={{ lineHeight: 1.75, marginBottom: '11px' }}>
+        {advisor.firmName} determines your Reasonable Compensation figure using objective,
+        third-party wage information published by the Bureau of Labor Statistics (BLS). The analysis
+        is based on your responses to a structured interview along with current BLS Occupational
+        Employment and Wage Statistics data for your specific occupation and location.
       </p>
-      <p style={{ lineHeight: 1.7, marginBottom: '10px' }}>
-        This report blends and weights the duties and responsibilities you perform annually in common
-        categories with the duties and responsibilities you perform specific to your business,
-        generating an annual salary that would be reasonable to &ldquo;replace&rdquo; yourself within your company.
+
+      <p style={{ lineHeight: 1.75, marginBottom: '11px' }}>
+        For purposes of this analysis, the BLS definition of full-time employment&mdash;2,080 hours
+        per year (40 hours per week)&mdash;is used as the benchmark. This standard has been
+        recognized by the Tax Court and IRS expert witnesses in <em>McAlary v. IRS</em>. Where an
+        owner works more than 40 hours per week, the Reasonable Compensation figure reflects
+        what a full-time employee would earn in that role rather than an overtime-adjusted amount.
       </p>
-      <p style={{ lineHeight: 1.7, marginBottom: '6px' }}>
-        Your annual salary or Reasonable Compensation represents an estimate of the amount it would
-        cost to &ldquo;replace&rdquo; you, based on:
+
+      <p style={{ lineHeight: 1.75, marginBottom: '11px' }}>
+        The analysis accounts for the full range of duties you perform across your business,
+        assigning an appropriate market wage to each function and combining them into a single
+        annual figure that reflects what it would cost to replace you across all of your roles.
       </p>
-      <ul style={{ paddingLeft: '20px', lineHeight: 1.8, marginBottom: '10px' }}>
-        <li>Your answers to our interview</li>
-        <li>Bureau of Labor Statistics data</li>
-        <li>Census data</li>
+
+      <p style={{ lineHeight: 1.75, marginBottom: '8px' }}>
+        The compensation estimate is derived from:
+      </p>
+      <ul style={{ paddingLeft: '22px', lineHeight: 2.0, marginBottom: '14px' }}>
+        <li>Your responses to the intake interview</li>
+        <li>Bureau of Labor Statistics Occupational Employment and Wage Statistics (OEWS) data</li>
       </ul>
-      <p style={{ lineHeight: 1.7, marginBottom: '16px' }}>
-        Reasonable Compensation figures include taxable Medicare wages and flexible spending accounts.
-        Reasonable Compensation figures do not include non-taxable fringe benefits such as health
-        insurance, vehicle or vehicle allowance, stock options, company loans and other items not
-        reported on a W-2 as Medicare wages.
+
+      <p style={{ lineHeight: 1.75, marginBottom: '16px' }}>
+        This figure encompasses taxable Medicare wages and flexible spending contributions. It
+        excludes non-taxable fringe benefits&mdash;such as employer-paid health coverage, vehicle
+        allowances, stock options, and any items not reflected on a W-2 as Medicare wages.
       </p>
-      <p style={{ fontWeight: 700, fontSize: '13px', marginBottom: '8px' }}>Methodology</p>
-      <p style={{ lineHeight: 1.7, marginBottom: '10px' }}>
-        This report uses the Cost Approach to determine a Reasonable Compensation figure. The Cost
-        Approach takes into consideration all the tasks a business owner provides to their company,
-        such as administration, accounting, marketing, purchasing etc. (also referred to as the Many
-        Hats Approach).
-      </p>
-      <p style={{ lineHeight: 1.7, marginBottom: '10px' }}>
-        The Cost Approach breaks down the time spent by the owner into the various tasks performed;
-        wage levels are assigned for each task based on the owner's proficiency, and then added back
-        together to obtain a hypothetical Replacement Cost for the owner.
-      </p>
-      <p style={{ lineHeight: 1.7 }}>
-        The Cost approach is most accurate when used to determine Reasonable Compensation for owners
-        of a closely-held business where the owner performs multiple job duties (wears many hats).
-      </p>
+
+      <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '14px' }}>
+        <p style={{ fontWeight: 700, fontSize: '13px', marginBottom: '9px', color: '#111827' }}>About the Cost Approach</p>
+        <p style={{ lineHeight: 1.75, marginBottom: '10px' }}>
+          This report applies the Cost Approach to valuing reasonable compensation. Under this
+          methodology, each distinct function the owner performs is identified, assigned a
+          market-based hourly rate corresponding to the owner's proficiency level, and weighted
+          by the proportion of time spent on that function. The weighted amounts are then summed
+          to produce a total replacement cost.
+        </p>
+        <p style={{ lineHeight: 1.75, marginBottom: '10px' }}>
+          Unlike approaches that focus solely on the owner's primary role, the Cost Approach
+          captures the full economic contribution of an owner who wears multiple hats&mdash;handling
+          not just their core professional duties but also management, finance, marketing, and
+          other operational functions.
+        </p>
+        <p style={{ lineHeight: 1.75 }}>
+          This approach is especially well-suited to closely-held businesses where the owner
+          serves in several capacities simultaneously, and is widely recognized by the IRS and
+          Tax Court for S-corporation reasonable compensation determinations.
+        </p>
+      </div>
     </Page>
   )
 }
 
-// ─── Other Considerations ────────────────────────────────────────────────────
+// ─── Other Considerations ─────────────────────────────────────────────────────
 function Page6Considerations({ report, advisor, pageNum, totalPages }) {
-  const pageProps = {
-    ...advisor,
-    clientName: `${report.client_first_name} ${report.client_last_name}`,
-    companyName: report.company_name,
-    reportYear: report.report_year,
-    pageNum, totalPages,
-  }
   return (
-    <Page {...pageProps}>
-      <p style={{ fontWeight: 700, fontSize: '14px', marginBottom: '12px' }}>
-        Other considerations before deciding on a final Reasonable Compensation figure
+    <Page {...advisor}
+      clientName={`${report.client_first_name} ${report.client_last_name}`}
+      companyName={report.company_name}
+      reportYear={report.report_year}
+      pageNum={pageNum} totalPages={totalPages}>
+
+      <p style={{ fontWeight: 700, fontSize: '15px', marginBottom: '14px', color: '#111827', fontFamily: 'Georgia, serif' }}>
+        Factors That May Warrant Adjusting the Compensation Figure
       </p>
-      <p style={{ lineHeight: 1.7, marginBottom: '10px' }}>
-        For the majority of shareholder-employees, the Reasonable Compensation figure calculated in
-        this report should not require adjustments. However there are circumstances, rules and
-        situations {advisor.firmName} may take into consideration before recommending a final
-        Reasonable Compensation figure. The list below is not exhaustive and {advisor.firmName} may
-        make adjustments for circumstances and situations not listed:
+
+      <p style={{ lineHeight: 1.75, marginBottom: '10px' }}>
+        For most shareholder-employees, the figure produced by this analysis will serve as a reliable
+        starting point without further modification. That said, {advisor.firmName} may consider
+        additional context before arriving at a final recommendation. The following factors are
+        illustrative, not exhaustive, and {advisor.firmName} reserves the right to apply judgment
+        in circumstances not listed here:
       </p>
-      <ul style={{ paddingLeft: '20px', lineHeight: 2.0, marginBottom: '16px' }}>
-        {['Compensation of Non-Owner Employees', 'Salary History', 'Travel Requirements',
-          'Personal Guarantee of Debt', 'Key Relationships and/or Contracts',
-          'Financial Condition of Company', 'Distribution History'].map(item => (
-          <li key={item}>{item}</li>
-        ))}
+
+      <ul style={{ paddingLeft: '22px', lineHeight: 2.1, marginBottom: '16px' }}>
+        {[
+          'Compensation paid to non-owner employees performing similar duties',
+          'The owner\'s compensation history in prior years',
+          'Significant travel demands associated with the role',
+          'Personal guarantees of company debt by the owner',
+          'Client relationships or key contracts that depend on the owner personally',
+          'Overall financial health and profitability of the business',
+          'History and pattern of distributions relative to salary',
+        ].map(item => <li key={item} style={{ color: '#374151' }}>{item}</li>)}
       </ul>
-      <p style={{ lineHeight: 1.7, marginBottom: '10px' }}>
-        The courts have used a variety of factors to &ldquo;Stress Test&rdquo; Reasonable Compensation
-        figures. Four well recognized lists of factors are below. {advisor.firmName} may stress test
-        your Reasonable Compensation figure against some or all of the factors used by the courts and
-        the IRS and recommend adjustments.
+
+      <p style={{ lineHeight: 1.75, marginBottom: '10px' }}>
+        Courts have applied a range of multi-factor tests when evaluating reasonable compensation
+        in disputed cases. {advisor.firmName} may benchmark the figure in this report against
+        one or more of these recognized frameworks:
       </p>
-      <ol style={{ paddingLeft: '20px', lineHeight: 2.0, marginBottom: '16px' }}>
-        <li>The IRS Nine Factors Considered by Tax Courts: IRS Fact Sheet 2008-25</li>
-        <li>The Tax Court&rsquo;s Five–Factor Test: LabelGraphics, Inc. v. Commissioner, T.C. Memo 1998–343</li>
-        <li>The Tax Court&rsquo;s Ten–Factor Test: Brewer Quality Homes, Inc. v. Commissioner, T.C. Memo 2003-200</li>
-        <li>Summary of Court Factors used to &ldquo;Stress Test&rdquo; Reasonable Compensation Figures</li>
+
+      <ol style={{ paddingLeft: '22px', lineHeight: 2.1, marginBottom: '16px' }}>
+        <li style={{ color: '#374151' }}>Nine-Factor Analysis Applied by the IRS &mdash; IRS Fact Sheet 2008-25</li>
+        <li style={{ color: '#374151' }}>Five-Factor Test &mdash; <em>LabelGraphics, Inc. v. Commissioner</em>, T.C. Memo 1998&ndash;343</li>
+        <li style={{ color: '#374151' }}>Ten-Factor Test &mdash; <em>Brewer Quality Homes, Inc. v. Commissioner</em>, T.C. Memo 2003-200</li>
+        <li style={{ color: '#374151' }}>Consolidated Court Factor Summary for Reasonable Compensation Review</li>
       </ol>
-      <p style={{ lineHeight: 1.7, marginBottom: '8px' }}>
-        Additional information on the issue of Reasonable Compensation for S Corporation owners:
+
+      <p style={{ lineHeight: 1.75, marginBottom: '8px' }}>
+        For further reference on S-corporation compensation requirements:
       </p>
-      <ul style={{ paddingLeft: '20px', lineHeight: 2.0 }}>
-        <li>IRS: S Corporation Compensation and Medical Insurance Issues</li>
-        <li>IRS: S Corporation Employees, Shareholders and Corporate Officers</li>
-        <li>IRS Fact Sheet 2008-25: Wage Compensation for S Corporation Officers</li>
+      <ul style={{ paddingLeft: '22px', lineHeight: 2.0 }}>
+        <li style={{ color: '#374151' }}>IRS Guidance: S Corporation Compensation and Medical Insurance Issues</li>
+        <li style={{ color: '#374151' }}>IRS Guidance: S Corporation Employees, Shareholders and Corporate Officers</li>
+        <li style={{ color: '#374151' }}>IRS Fact Sheet 2008-25: Wage Compensation for S Corporation Officers</li>
       </ul>
     </Page>
   )
 }
 
-// ─── Task Descriptions ───────────────────────────────────────────────────────
+// ─── Task Descriptions ────────────────────────────────────────────────────────
 function TaskDescriptionPages({ report, advisor, tasks, startPage, totalPages }) {
   const pageProps = {
     ...advisor,
@@ -471,91 +484,97 @@ function TaskDescriptionPages({ report, advisor, tasks, startPage, totalPages })
   }
 
   const unique = []
-  const seen = new Set()
+  const seen   = new Set()
   for (const t of tasks) {
     if (!seen.has(t.title)) { seen.add(t.title); unique.push(t) }
   }
-  const half = Math.ceil(unique.length / 2)
+  const half  = Math.ceil(unique.length / 2)
   const pages = [unique.slice(0, half), unique.slice(half)]
 
   return pages.map((pageTasks, i) => (
     <Page key={i} {...pageProps} pageNum={startPage + i}>
       {i === 0 && (
-        <p style={{ fontWeight: 700, fontSize: '14px', marginBottom: '16px' }}>
-          Appendix A — Descriptions of Tasks Selected
+        <p style={{ fontWeight: 700, fontSize: '15px', marginBottom: '18px', color: '#111827', fontFamily: 'Georgia, serif' }}>
+          Appendix A &mdash; Role Descriptions
         </p>
       )}
       {pageTasks.map((task, j) => (
-        <div key={j} style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <div style={{ width: '3px', height: '14px', backgroundColor: CATEGORIES[task.categoryId]?.color ?? BRAND, borderRadius: '2px', flexShrink: 0 }} />
-            <p style={{ fontWeight: 700, fontSize: '12.5px', margin: 0 }}>{task.title}</p>
-            <span style={{ fontSize: '10.5px', color: '#9ca3af' }}>SOC {task.soc}</span>
+        <div key={j} style={{ marginBottom: '16px', paddingBottom: '14px', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+            <div style={{
+              width: '10px', height: '10px',
+              backgroundColor: CATEGORIES[task.categoryId]?.color ?? BRAND,
+              borderRadius: '50%', flexShrink: 0,
+            }} />
+            <p style={{ fontWeight: 700, fontSize: '12.5px', margin: 0, color: '#111827' }}>{task.title}</p>
+            <span style={{ fontSize: '10px', color: '#9ca3af', fontStyle: 'italic' }}>SOC {task.soc}</span>
           </div>
-          <p style={{ lineHeight: 1.65, color: '#374151', margin: 0, paddingLeft: '11px' }}>{task.description}</p>
+          <p style={{ lineHeight: 1.7, color: '#4b5563', margin: 0, paddingLeft: '20px', fontFamily: 'Georgia, serif' }}>{task.description}</p>
         </div>
       ))}
     </Page>
   ))
 }
 
-// ─── Corporate Minutes ───────────────────────────────────────────────────────
+// ─── Corporate Minutes ────────────────────────────────────────────────────────
 function Page9Minutes({ report, advisor, totalCompensation, pageNum, totalPages }) {
-  const pageProps = {
-    ...advisor,
-    clientName: `${report.client_first_name} ${report.client_last_name}`,
-    companyName: report.company_name,
-    reportYear: report.report_year,
-    pageNum, totalPages,
-  }
   return (
-    <Page {...pageProps}>
-      <p style={{ fontWeight: 700, fontSize: '14px', marginBottom: '10px' }}>
-        Sample Language for Your Corporate Minutes
+    <Page {...advisor}
+      clientName={`${report.client_first_name} ${report.client_last_name}`}
+      companyName={report.company_name}
+      reportYear={report.report_year}
+      pageNum={pageNum} totalPages={totalPages}>
+
+      <p style={{ fontWeight: 700, fontSize: '15px', marginBottom: '12px', color: '#111827', fontFamily: 'Georgia, serif' }}>
+        Suggested Language for Corporate Minutes
       </p>
-      <p style={{ lineHeight: 1.7, marginBottom: '20px' }}>
-        {advisor.firmName} recommends incorporating the results of this report into the Corporate
-        Minutes of your S Corporation. Here is a sample document for that purpose:
-      </p>
-      <p style={{ textAlign: 'center', fontWeight: 700, fontSize: '13px', marginBottom: '16px' }}>
-        CONSENT AND MINUTES OF MEETING OF DIRECTORS OF {report.company_name.toUpperCase()}
-      </p>
-      <p style={{ lineHeight: 1.7, marginBottom: '6px' }}>
-        The undersigned, being all of the directors of {report.company_name} (the &ldquo;Company&rdquo;),
-        waive any rights to notice, and consent to the following action, taken on
-      </p>
-      <p style={{ marginBottom: '20px' }}>______________________ , 20___ :</p>
-      <p style={{ lineHeight: 1.7, marginBottom: '24px' }}>
-        <strong>RESOLVED,</strong> that the Company adopt the report of {advisor.firmName}, a copy of
-        which is attached and, in reliance on such report, pay to{' '}
-        {report.client_first_name} {report.client_last_name} the sum of{' '}
-        <strong>{formatCurrency(totalCompensation)}</strong> per year as salary for the duties set
-        forth in such report.
+      <p style={{ lineHeight: 1.75, marginBottom: '20px' }}>
+        To maintain a complete compliance record, {advisor.firmName} recommends that the
+        Reasonable Compensation figure established by this report be formally adopted in the
+        S Corporation&rsquo;s board of directors minutes. The following template may be adapted
+        for that purpose:
       </p>
 
-      {/* Disclaimer */}
-      <div style={{ border: '1px solid #fcd34d', borderRadius: '6px', padding: '14px 16px', backgroundColor: '#fffbeb' }}>
-        <p style={{ fontWeight: 700, color: '#d97706', marginBottom: '8px' }}>DISCLAIMER NOTICE!</p>
-        <p style={{ lineHeight: 1.65, marginBottom: '8px', color: '#374151' }}>
-          This document is being provided merely as a sample of the type of language that the S
-          Corporation may consider using in connection with minutes of the board of directors adopting
-          the amounts determined by {advisor.firmName} as Reasonable Compensation for its employees.
+      <p style={{ textAlign: 'center', fontWeight: 700, fontSize: '12.5px', marginBottom: '16px', letterSpacing: '0.03em' }}>
+        ACTION BY WRITTEN CONSENT OF THE BOARD OF DIRECTORS OF {report.company_name.toUpperCase()}
+      </p>
+
+      <p style={{ lineHeight: 1.75, marginBottom: '6px' }}>
+        The undersigned, constituting all of the directors of {report.company_name} (the
+        &ldquo;Corporation&rdquo;), hereby waive any required notice and consent to the following
+        corporate action as of:
+      </p>
+      <p style={{ marginBottom: '22px' }}>______________________ , 20___ :</p>
+      <p style={{ lineHeight: 1.75, marginBottom: '28px' }}>
+        <strong>RESOLVED,</strong> that the Corporation hereby adopts the Reasonable Compensation
+        analysis prepared by {advisor.firmName}, a copy of which is incorporated herein by
+        reference, and that {report.client_first_name} {report.client_last_name} shall receive
+        annual salary compensation of <strong>{formatCurrency(totalCompensation)}</strong> for
+        the services described therein.
+      </p>
+
+      <div style={{ border: '1px solid #d97706', borderLeft: '5px solid #d97706', borderRadius: '4px', padding: '14px 16px', backgroundColor: '#fffbeb' }}>
+        <p style={{ fontWeight: 700, color: '#92400e', marginBottom: '8px', fontSize: '12px' }}>Important Notice</p>
+        <p style={{ lineHeight: 1.7, marginBottom: '8px', color: '#374151' }}>
+          This template is provided for general reference only. It illustrates the type of
+          resolution a board of directors might adopt when formally approving a compensation
+          figure supported by an independent analysis.
         </p>
-        <p style={{ lineHeight: 1.65, marginBottom: '8px', color: '#374151' }}>
-          {advisor.firmName} does not provide legal services, and does not represent that this sample
-          will comply with state laws regarding the procedure for actions of the S Corporation&rsquo;s board
-          of directors or the form or content of the minutes memorializing such actions.
+        <p style={{ lineHeight: 1.7, marginBottom: '8px', color: '#374151' }}>
+          {advisor.firmName} does not practice law and makes no representation that this
+          language satisfies the procedural or substantive requirements of any particular state
+          regarding board actions or the content of corporate minutes.
         </p>
         <p style={{ fontWeight: 600, color: '#374151' }}>
-          {advisor.firmName} recommends that the S Corporation consult its attorney for legal advice
-          regarding such matters.
+          The Corporation should consult qualified legal counsel before finalizing and executing
+          any corporate minutes.
         </p>
       </div>
     </Page>
   )
 }
 
-// ─── Main export ─────────────────────────────────────────────────────────────
+// ─── Main export ──────────────────────────────────────────────────────────────
 export default function ReportDocument({ report, advisorProfile, tasks, totalCompensation, categoryTotals }) {
   const advisor = {
     logoUrl:     advisorProfile?.logo_url     ?? null,
@@ -563,18 +582,16 @@ export default function ReportDocument({ report, advisorProfile, tasks, totalCom
     advisorName: advisorProfile?.advisor_name ?? 'Your Advisor',
   }
 
-  // Compute dynamic page numbers based on how many task breakdown pages there are.
-  // With CATS_PER_PAGE=3 and 5 categories: numTaskPages=2 → 8 pages total.
-  const activeCats = CATEGORY_ORDER.filter(id => categoryTotals[id])
+  const activeCats    = CATEGORY_ORDER.filter(id => categoryTotals[id])
   const numTaskPages  = Math.ceil(activeCats.length / CATS_PER_PAGE)
-  const methodPage    = 2 + numTaskPages   // Methodology
-  const considPage    = methodPage + 1     // Considerations
-  const descStartPage = considPage + 1     // Task Descriptions (2 pages)
-  const minutesPage   = descStartPage + 2  // Corporate Minutes
+  const methodPage    = 2 + numTaskPages
+  const considPage    = methodPage + 1
+  const descStartPage = considPage + 1
+  const minutesPage   = descStartPage + 2
   const totalPages    = minutesPage
 
   return (
-    <div id="report-document" style={{ backgroundColor: '#f3f4f6' }}>
+    <div id="report-document" style={{ backgroundColor: '#e5e7eb' }}>
       <Page1
         report={report} advisor={advisor}
         totalCompensation={totalCompensation} categoryTotals={categoryTotals}
@@ -585,22 +602,10 @@ export default function ReportDocument({ report, advisorProfile, tasks, totalCom
         tasks={tasks} categoryTotals={categoryTotals}
         startPage={2} totalPages={totalPages}
       />
-      <Page5Methodology
-        report={report} advisor={advisor}
-        pageNum={methodPage} totalPages={totalPages}
-      />
-      <Page6Considerations
-        report={report} advisor={advisor}
-        pageNum={considPage} totalPages={totalPages}
-      />
-      <TaskDescriptionPages
-        report={report} advisor={advisor} tasks={tasks}
-        startPage={descStartPage} totalPages={totalPages}
-      />
-      <Page9Minutes
-        report={report} advisor={advisor} totalCompensation={totalCompensation}
-        pageNum={minutesPage} totalPages={totalPages}
-      />
+      <Page5Methodology report={report} advisor={advisor} pageNum={methodPage} totalPages={totalPages} />
+      <Page6Considerations report={report} advisor={advisor} pageNum={considPage} totalPages={totalPages} />
+      <TaskDescriptionPages report={report} advisor={advisor} tasks={tasks} startPage={descStartPage} totalPages={totalPages} />
+      <Page9Minutes report={report} advisor={advisor} totalCompensation={totalCompensation} pageNum={minutesPage} totalPages={totalPages} />
     </div>
   )
 }
