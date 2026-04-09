@@ -29,6 +29,33 @@
   }
 }
 
+/* Docs article prose styles */
+.docs-content article h1 {
+  @apply text-3xl font-bold text-gray-900 mb-4 tracking-tight;
+}
+.docs-content article h2 {
+  @apply text-xl font-semibold text-gray-900 mt-10 mb-3;
+}
+.docs-content article p {
+  @apply text-gray-600 leading-relaxed mb-4;
+}
+.docs-content article p.lead {
+  @apply text-lg text-gray-700 mb-8;
+}
+.docs-content article ul,
+.docs-content article ol {
+  @apply text-gray-600 leading-relaxed mb-4 pl-6 space-y-1.5;
+}
+.docs-content article ul { @apply list-disc; }
+.docs-content article ol { @apply list-decimal; }
+.docs-content article li strong { @apply text-gray-800; }
+.docs-content article a {
+  @apply text-brand-600 hover:text-brand-700 underline underline-offset-2;
+}
+.docs-content article blockquote {
+  @apply border-l-4 border-brand-200 pl-5 py-1 my-6 text-gray-600 italic bg-brand-50 rounded-r-lg;
+}
+
 /* Print / PDF styles */
 @media print {
   body { background: white; }

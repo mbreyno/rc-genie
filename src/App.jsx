@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
 import Landing        from './pages/Landing'
+import Docs           from './pages/Docs'
 import Login          from './pages/Login'
 import Signup         from './pages/Signup'
 import ForgotPassword from './pages/ForgotPassword'
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/signup"          element={<PublicRoute><Signup         /></PublicRoute>} />
           <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
           <Route path="/reset-password"  element={<ResetPassword />} />
+          <Route path="/docs"            element={<Docs />} />
 
           {/* Protected */}
           <Route path="/dashboard"    element={<ProtectedRoute><Dashboard  /></ProtectedRoute>} />

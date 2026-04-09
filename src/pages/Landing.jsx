@@ -83,6 +83,9 @@ export default function Landing() {
             <span className="font-bold text-gray-900 text-lg tracking-tight">RC Genie</span>
           </div>
           <div className="flex items-center gap-3">
+            <Link to="/docs" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              Docs
+            </Link>
             <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
               Sign in
             </Link>
@@ -299,6 +302,7 @@ export default function Landing() {
             © {new Date().getFullYear()} RC Genie. Wage data sourced from the U.S. Bureau of Labor Statistics.
           </p>
           <div className="flex gap-4 text-sm">
+            <Link to="/docs"   className="text-gray-400 hover:text-gray-600 transition-colors">Docs</Link>
             <a href="mailto:support@rcgenie.app" className="text-gray-400 hover:text-gray-600 transition-colors">Help</a>
             <Link to="/login"  className="text-gray-400 hover:text-gray-600 transition-colors">Sign in</Link>
             <Link to="/signup" className="text-gray-400 hover:text-gray-600 transition-colors">Sign up</Link>
