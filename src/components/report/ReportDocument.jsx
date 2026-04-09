@@ -153,7 +153,7 @@ function ChartWithLegend({ title, segments }) {
   )
 }
 
-const CATS_PER_PAGE = 3
+const CATS_PER_PAGE = 5
 
 // ─── Page 1: Cover ───────────────────────────────────────────────────────────
 function Page1({ report, advisor, totalCompensation, categoryTotals, totalPages }) {
