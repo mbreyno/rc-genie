@@ -14,11 +14,28 @@ export default function Profile() {
   })
   const [logoPreview, setLogoPreview] = useState(profile?.logo_url ?? null)
   const [logoFile,    setLogoFile]    = useState(null)
+  const [brandColor,  setBrandColor]  = useState(profile?.brand_color ?? '#1a3de8')
+  const [colorHex,    setColorHex]    = useState(profile?.brand_color ?? '#1a3de8')
   const [saving,      setSaving]      = useState(false)
   const [success,     setSuccess]     = useState(false)
   const [error,       setError]       = useState('')
 
   function set(field) { return e => setForm(f => ({ ...f, [field]: e.target.value })) }
+
+  function handleColorPickerChange(e) {
+    const val = e.target.value
+    setBrandColor(val)
+    setColorHex(val)
+  }
+
+  function handleColorHexChange(e) {
+    const val = e.target.value
+    setColorHex(val)
+    // Only sync picker if it's a valid 6-digit hex
+    if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+      setBrandColor(val)
+    }
+  }
 
   function handleLogoChange(e) {
     const file = e.target.files?.[0]
@@ -60,6 +77,7 @@ export default function Profile() {
         advisor_email: form.advisor_email.trim(),
         logo_url:      logoUrl,
         logo_path:     logoPath,
+        brand_color:   /^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : '#1a3de8',
       }
 
       const { error: dbError } = await supabase
@@ -145,6 +163,60 @@ export default function Profile() {
                       Remove
                     </button>
                   )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Brand Color */}
+          <div className="card">
+            <h2 className="text-base font-semibold text-gray-900 mb-1">Brand Color</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              This color is used throughout your generated reports — headers, accents, and callout boxes.
+            </p>
+            <div className="flex items-center gap-4">
+              {/* Color swatch / native picker */}
+              <div className="relative shrink-0">
+                <div
+                  className="w-14 h-14 rounded-xl border border-gray-200 shadow-sm cursor-pointer overflow-hidden"
+                  style={{ background: /^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : '#1a3de8' }}
+                >
+                  <input
+                    type="color"
+                    value={/^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : '#1a3de8'}
+                    onChange={handleColorPickerChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    title="Pick a color"
+                  />
+                </div>
+              </div>
+
+              {/* Hex input */}
+              <div className="flex-1 max-w-[180px]">
+                <label className="form-label">Hex code</label>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-400 text-sm font-mono">#</span>
+                  <input
+                    type="text"
+                    maxLength={7}
+                    value={colorHex.replace(/^#/, '')}
+                    onChange={e => handleColorHexChange({ target: { value: '#' + e.target.value.replace(/^#/, '') } })}
+                    className="form-input font-mono uppercase"
+                    placeholder="1a3de8"
+                  />
+                </div>
+              </div>
+
+              {/* Live preview stripe */}
+              <div className="flex-1">
+                <p className="text-xs text-gray-500 mb-2">Preview</p>
+                <div className="rounded-lg overflow-hidden border border-gray-200 h-10 flex">
+                  <div className="w-1.5 shrink-0" style={{ background: /^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : '#1a3de8' }} />
+                  <div className="flex-1 flex items-center px-3 bg-white">
+                    <span className="text-xs font-semibold" style={{ color: /^#[0-9a-fA-F]{6}$/.test(brandColor) ? brandColor : '#1a3de8' }}>
+                      Report accent color
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

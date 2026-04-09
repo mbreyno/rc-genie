@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS advisor_profiles (
   advisor_email TEXT,
   logo_url      TEXT,          -- Supabase Storage public URL
   logo_path     TEXT,          -- Storage path for deletion
+  brand_color   TEXT DEFAULT '#1a3de8',  -- Primary brand color (hex) used in generated reports
   created_at    TIMESTAMPTZ DEFAULT NOW(),
   updated_at    TIMESTAMPTZ DEFAULT NOW()
 );

@@ -15,12 +15,31 @@ import { formatCurrency } from '../../utils/calculations'
 
 const CATEGORY_ORDER = ['myBusiness', 'management', 'marketing', 'finance', 'hr']
 
-const BRAND    = '#1a3de8'
-const BRAND_LT = '#eef0fd'
-const BRAND_XL = '#f5f6fe'
+const DEFAULT_BRAND = '#1a3de8'
+
+/** Blend hex color with white by `factor` (0=original, 1=white). Returns #rrggbb. */
+function tintHex(hex, factor) {
+  const h = hex.replace('#', '')
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  const tr = Math.round(r + (255 - r) * factor)
+  const tg = Math.round(g + (255 - g) * factor)
+  const tb = Math.round(b + (255 - b) * factor)
+  return '#' + [tr, tg, tb].map(v => v.toString(16).padStart(2, '0')).join('')
+}
+
+function makeBrandColors(hex) {
+  const base = /^#[0-9a-fA-F]{6}$/.test(hex) ? hex : DEFAULT_BRAND
+  return {
+    brand:    base,
+    brandLt:  tintHex(base, 0.88),  // ~eef0fd equivalent
+    brandXl:  tintHex(base, 0.95),  // ~f5f6fe equivalent
+  }
+}
 
 // ─── Page wrapper ─────────────────────────────────────────────────────────────
-function Page({ children, logoUrl, firmName, clientName, companyName, reportYear, pageNum, totalPages }) {
+function Page({ children, logoUrl, firmName, clientName, companyName, reportYear, pageNum, totalPages, brand, brandLt, brandXl }) {
   return (
     <div style={{
       width: '816px',
@@ -44,13 +63,13 @@ function Page({ children, logoUrl, firmName, clientName, companyName, reportYear
         justifyContent: 'space-between',
         height: '88px',
         flexShrink: 0,
-        borderBottom: `3px solid ${BRAND}`,
+        borderBottom: `3px solid ${brand}`,
       }}>
         {/* Logo / firm name — full color, no filter */}
         <div style={{ maxWidth: '180px', maxHeight: '56px' }}>
           {logoUrl
             ? <img src={logoUrl} alt={firmName} style={{ maxWidth: '180px', maxHeight: '56px', objectFit: 'contain' }} />
-            : <div style={{ fontSize: '20px', fontWeight: 700, color: BRAND, letterSpacing: '-0.3px' }}>{firmName}</div>
+            : <div style={{ fontSize: '20px', fontWeight: 700, color: brand, letterSpacing: '-0.3px' }}>{firmName}</div>
           }
         </div>
         {/* Metadata — dark text on white background */}
@@ -68,11 +87,11 @@ function Page({ children, logoUrl, firmName, clientName, companyName, reportYear
       <div style={{
         flexShrink: 0,
         padding: '7px 48px',
-        borderTop: `2px solid ${BRAND}`,
+        borderTop: `2px solid ${brand}`,
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: BRAND_XL,
+        backgroundColor: brandXl,
         fontSize: '9.5px',
         color: '#6b7280',
       }}>
@@ -80,7 +99,7 @@ function Page({ children, logoUrl, firmName, clientName, companyName, reportYear
           All compensation figures in this report are expressed as annual amounts in U.S. dollars.
           "Annual Salary" and "Reasonable Compensation" are used interchangeably throughout.
         </span>
-        <span style={{ color: BRAND, fontWeight: 700, whiteSpace: 'nowrap', marginLeft: '16px', fontSize: '10px' }}>
+        <span style={{ color: brand, fontWeight: 700, whiteSpace: 'nowrap', marginLeft: '16px', fontSize: '10px' }}>
           {pageNum} / {totalPages}
         </span>
       </div>
@@ -136,10 +155,10 @@ function DonutCanvas({ segments, size = 160 }) {
   )
 }
 
-function ChartWithLegend({ title, segments }) {
+function ChartWithLegend({ title, segments, brand }) {
   return (
     <div style={{ textAlign: 'center' }}>
-      <div style={{ fontWeight: 700, fontSize: '12px', marginBottom: '8px', color: BRAND, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{title}</div>
+      <div style={{ fontWeight: 700, fontSize: '12px', marginBottom: '8px', color: brand, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{title}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '3px 8px', marginBottom: '8px' }}>
         {segments.map((seg, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10.5px' }}>
@@ -157,6 +176,7 @@ const CATS_PER_PAGE = 5
 
 // ─── Page 1: Cover ───────────────────────────────────────────────────────────
 function Page1({ report, advisor, totalCompensation, categoryTotals, totalPages }) {
+  const { brand, brandLt, brandXl } = advisor
   const timeSegments = CATEGORY_ORDER
     .filter(id => categoryTotals[id])
     .map(id => ({ label: CATEGORIES[id].label, value: categoryTotals[id].pctOfTotal, color: CATEGORIES[id].color }))
@@ -177,7 +197,7 @@ function Page1({ report, advisor, totalCompensation, categoryTotals, totalPages 
       {/* Compensation callout — solid brand background */}
       <div style={{
         textAlign: 'center',
-        backgroundColor: BRAND,
+        backgroundColor: brand,
         borderRadius: '8px',
         padding: '16px 24px',
         marginBottom: '18px',
@@ -195,10 +215,10 @@ function Page1({ report, advisor, totalCompensation, categoryTotals, totalPages 
         <tbody>
           <tr>
             <td style={{ width: '50%', textAlign: 'center', verticalAlign: 'top', padding: '0 12px 0 0' }}>
-              <ChartWithLegend title="Time Allocation" segments={timeSegments} />
+              <ChartWithLegend title="Time Allocation" segments={timeSegments} brand={brand} />
             </td>
             <td style={{ width: '50%', textAlign: 'center', verticalAlign: 'top', padding: '0 0 0 12px' }}>
-              <ChartWithLegend title="Compensation Allocation" segments={compSegments} />
+              <ChartWithLegend title="Compensation Allocation" segments={compSegments} brand={brand} />
             </td>
           </tr>
         </tbody>
@@ -227,7 +247,7 @@ function Page1({ report, advisor, totalCompensation, categoryTotals, totalPages 
 
       {/* Report details — simple two-column grid */}
       <div style={{ borderTop: `1px solid #e5e7eb`, paddingTop: '12px' }}>
-        <div style={{ fontSize: '10px', fontWeight: 700, color: BRAND, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }}>
+        <div style={{ fontSize: '10px', fontWeight: 700, color: brand, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '7px' }}>
           Report Details
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
@@ -265,6 +285,7 @@ function Page1({ report, advisor, totalCompensation, categoryTotals, totalPages 
 
 // ─── Pages 2+: Task Breakdowns ────────────────────────────────────────────────
 function TaskBreakdownPages({ report, advisor, tasks, categoryTotals, startPage, totalPages }) {
+  const { brand } = advisor
   const tasksByCategory = {}
   for (const task of tasks) {
     if (!tasksByCategory[task.categoryId]) tasksByCategory[task.categoryId] = []
@@ -289,7 +310,7 @@ function TaskBreakdownPages({ report, advisor, tasks, categoryTotals, startPage,
         const cat      = CATEGORIES[catId]
         const catTot   = categoryTotals[catId]
         const catTasks = tasksByCategory[catId] ?? []
-        const catColor = cat.color ?? BRAND
+        const catColor = cat.color ?? brand
         return (
           <div key={catId} style={{ marginBottom: '26px' }}>
             {/* Category header — uses each category's own color */}
@@ -329,7 +350,7 @@ function TaskBreakdownPages({ report, advisor, tasks, categoryTotals, startPage,
                     <td style={{ padding: '6px 9px', textAlign: 'right' }}>{task.pctOfTotal}%</td>
                     <td style={{ padding: '6px 9px', textAlign: 'right' }}>{task.hoursPerYear.toLocaleString()}</td>
                     <td style={{ padding: '6px 9px', textAlign: 'right' }}>${task.hourlyWage.toFixed(2)}</td>
-                    <td style={{ padding: '6px 9px', textAlign: 'right', fontWeight: 700, color: BRAND }}>{formatCurrency(task.annualWage)}</td>
+                    <td style={{ padding: '6px 9px', textAlign: 'right', fontWeight: 700, color: brand }}>{formatCurrency(task.annualWage)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -474,6 +495,7 @@ function Page6Considerations({ report, advisor, pageNum, totalPages }) {
 
 // ─── Task Descriptions ────────────────────────────────────────────────────────
 function TaskDescriptionPages({ report, advisor, tasks, startPage, totalPages }) {
+  const { brand } = advisor
   const pageProps = {
     ...advisor,
     clientName: `${report.client_first_name} ${report.client_last_name}`,
@@ -502,7 +524,7 @@ function TaskDescriptionPages({ report, advisor, tasks, startPage, totalPages })
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
             <div style={{
               width: '10px', height: '10px',
-              backgroundColor: CATEGORIES[task.categoryId]?.color ?? BRAND,
+              backgroundColor: CATEGORIES[task.categoryId]?.color ?? brand,
               borderRadius: '50%', flexShrink: 0,
             }} />
             <p style={{ fontWeight: 700, fontSize: '12.5px', margin: 0, color: '#111827' }}>{task.title}</p>
@@ -575,10 +597,14 @@ function Page9Minutes({ report, advisor, totalCompensation, pageNum, totalPages 
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 export default function ReportDocument({ report, advisorProfile, tasks, totalCompensation, categoryTotals }) {
+  const { brand, brandLt, brandXl } = makeBrandColors(advisorProfile?.brand_color)
   const advisor = {
     logoUrl:     advisorProfile?.logo_url     ?? null,
     firmName:    advisorProfile?.firm_name    ?? 'Your Firm',
     advisorName: advisorProfile?.advisor_name ?? 'Your Advisor',
+    brand,
+    brandLt,
+    brandXl,
   }
 
   const activeCats    = CATEGORY_ORDER.filter(id => categoryTotals[id])
