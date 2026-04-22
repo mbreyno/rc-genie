@@ -53,6 +53,7 @@ export default function NewReport() {
   const [saving,      setSaving]      = useState(false)
   const [loadingEdit, setLoadingEdit] = useState(isEditing)
   const [error,       setError]       = useState('')
+  const [draftId,     setDraftId]     = useState(null)   // ID of auto-saved draft for new reports
 
   // When editing, load the existing report and pre-populate the wizard
   useEffect(() => {
@@ -100,6 +101,57 @@ export default function NewReport() {
   function next() { setStep(s => Math.min(s + 1, STEPS.length)) }
   function prev() { setStep(s => Math.max(s - 1, 1)) }
 
+  // Auto-save a draft the moment the user reaches the Review step.
+  // This ensures the report is always persisted even if they close the tab
+  // or navigate away before clicking "Generate Report".
+  // On subsequent visits to step 6 (e.g. after going back to edit), we update the draft.
+  useEffect(() => {
+    if (step !== 6 || isEditing || !user) return
+    autoSaveDraft()
+  }, [step])  // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function autoSaveDraft() {
+    try {
+      const { tasks, totalCompensation } = computeReport(data)
+      const reportData = {
+        client_first_name:    data.clientFirstName,
+        client_last_name:     data.clientLastName,
+        company_name:         data.companyName,
+        state_name:           data.stateName,
+        state_fips:           data.stateFips,
+        msa_code:             data.msaCode  || null,
+        msa_name:             data.msaName  || null,
+        hours_worked:         data.hoursWorked,
+        industry_id:          data.industryId,
+        industry_label:       data.industryLabel,
+        category_allocations: data.categoryAllocations,
+        tasks,
+        total_compensation:   totalCompensation,
+        report_year:          data.reportYear,
+      }
+
+      if (draftId) {
+        // User went back and changed something — update the existing draft silently
+        await supabase
+          .from('reports')
+          .update(reportData)
+          .eq('id', draftId)
+          .eq('advisor_id', user.id)
+      } else {
+        // First time reaching review — create the draft
+        const { data: saved, error: dbError } = await supabase
+          .from('reports')
+          .insert({ ...reportData, advisor_id: user.id })
+          .select('id')
+          .single()
+        if (!dbError && saved) setDraftId(saved.id)
+      }
+    } catch {
+      // Auto-save is best-effort — don't surface errors to the user here.
+      // The explicit Generate button is the fallback.
+    }
+  }
+
   async function handleGenerate() {
     setSaving(true)
     setError('')
@@ -132,8 +184,17 @@ export default function NewReport() {
           .eq('id', id)
           .eq('advisor_id', user.id)
         if (dbError) throw new Error(dbError.message)
+      } else if (draftId) {
+        // Draft was auto-saved when user reached step 6 — just update it
+        const { error: dbError } = await supabase
+          .from('reports')
+          .update(reportData)
+          .eq('id', draftId)
+          .eq('advisor_id', user.id)
+        if (dbError) throw new Error(dbError.message)
+        savedId = draftId
       } else {
-        // Insert new report
+        // Fallback: auto-save didn't run (e.g. offline briefly) — insert now
         const { data: saved, error: dbError } = await supabase
           .from('reports')
           .insert({ ...reportData, advisor_id: user.id })

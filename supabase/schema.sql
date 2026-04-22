@@ -49,7 +49,8 @@ CREATE TABLE IF NOT EXISTS reports (
   -- Location
   state_name           TEXT NOT NULL,
   state_fips           TEXT NOT NULL,
-  county               TEXT NOT NULL,
+  msa_code             TEXT,            -- Metro Statistical Area code (nullable for state-only)
+  msa_name             TEXT,            -- Metro Statistical Area display name
 
   -- Work parameters
   hours_worked         INTEGER NOT NULL DEFAULT 2080,
