@@ -303,7 +303,7 @@ export default function Landing() {
           </p>
           <div className="flex gap-4 text-sm">
             <Link to="/docs"   className="text-gray-400 hover:text-gray-600 transition-colors">Docs</Link>
-            <a href="mailto:support@rcgenie.app" className="text-gray-400 hover:text-gray-600 transition-colors">Help</a>
+            <a href="mailto:support@rcgenie.app?subject=Help%20with%20RC%20Genie" className="text-gray-400 hover:text-gray-600 transition-colors">Help</a>
             <Link to="/login"  className="text-gray-400 hover:text-gray-600 transition-colors">Sign in</Link>
             <Link to="/signup" className="text-gray-400 hover:text-gray-600 transition-colors">Sign up</Link>
           </div>

@@ -77,7 +77,7 @@ function GettingStarted() {
       <p>
         If you run into any issues, click the <strong>Help</strong> link in the
         navigation bar to send an email to our support team at{' '}
-        <a href="mailto:support@rcgenie.app">support@rcgenie.app</a>. We typically
+        <a href="mailto:support@rcgenie.app?subject=Help%20with%20RC%20Genie">support@rcgenie.app</a>. We typically
         respond within one business day.
       </p>
     </article>
@@ -502,7 +502,7 @@ export default function Docs() {
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                   Support
                 </p>
-                <a href="mailto:support@rcgenie.app"
+                <a href="mailto:support@rcgenie.app?subject=Help%20with%20RC%20Genie"
                   className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 font-medium rounded-lg hover:bg-gray-50 transition-colors">
                   <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
