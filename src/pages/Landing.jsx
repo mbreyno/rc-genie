@@ -83,6 +83,9 @@ export default function Landing() {
             <span className="font-bold text-gray-900 text-lg tracking-tight">RC Genie</span>
           </div>
           <div className="flex items-center gap-3">
+            <a href="#pricing" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              Pricing
+            </a>
             <Link to="/docs" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
               Docs
             </Link>
@@ -91,7 +94,7 @@ export default function Landing() {
             </Link>
             <Link to="/signup"
               className="text-sm font-semibold bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg shadow-sm transition-colors">
-              Get started free
+              Start free trial
             </Link>
           </div>
         </div>
@@ -125,7 +128,7 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/signup"
               className="inline-flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-7 py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all text-base">
-              Start for free
+              Start your 7-day free trial
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -135,6 +138,9 @@ export default function Landing() {
               Sign in to your account
             </Link>
           </div>
+          <p className="text-sm text-gray-400 mt-4">
+            No credit card required · $9/month after your trial · Cancel anytime
+          </p>
         </div>
 
         {/* Mock report stats card */}
@@ -234,6 +240,60 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── Pricing ─────────────────────────────────────────────────────── */}
+      <section id="pricing" className="py-24 px-6 bg-gray-50 border-y border-gray-100">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+              Simple, honest pricing
+            </h2>
+            <p className="text-gray-500 text-lg max-w-xl mx-auto">
+              One plan, everything included. Try it free for 7 days — no credit card required.
+            </p>
+          </div>
+
+          <div className="max-w-md mx-auto">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+              <div className="bg-brand-600 text-center py-3">
+                <p className="text-sm font-semibold text-white uppercase tracking-wide">7-day free trial</p>
+              </div>
+              <div className="p-8">
+                <div className="text-center pb-6 border-b border-gray-100">
+                  <p className="mb-1">
+                    <span className="text-5xl font-extrabold text-gray-900">$9</span>
+                    <span className="text-gray-500 font-medium text-lg">/month</span>
+                  </p>
+                  <p className="text-sm text-gray-400">after your free trial · cancel anytime</p>
+                </div>
+                <ul className="py-6 space-y-3.5">
+                  {[
+                    'Unlimited reasonable compensation reports',
+                    'Location-specific BLS wage data (state & metro)',
+                    'Branded, client-ready PDF reports',
+                    'Your firm logo and brand color on every report',
+                    'Self-service billing — update or cancel anytime',
+                  ].map(item => (
+                    <li key={item} className="flex items-start gap-3 text-sm text-gray-600">
+                      <svg className="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/signup"
+                  className="block w-full text-center bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all">
+                  Start your free trial
+                </Link>
+                <p className="text-xs text-gray-400 text-center mt-4">
+                  No credit card required to start. Billing handled securely by Stripe.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── How it works ────────────────────────────────────────────────── */}
       <section className="py-24 px-6 bg-gradient-to-b from-brand-600 to-brand-800 text-white">
         <div className="max-w-5xl mx-auto">
@@ -274,11 +334,11 @@ export default function Landing() {
             Ready to generate your first report?
           </h2>
           <p className="text-gray-500 text-lg mb-8">
-            Create a free account and produce a professional reasonable compensation report in minutes.
+            Try RC Genie free for 7 days — no credit card required. Then just $9/month, cancel anytime.
           </p>
           <Link to="/signup"
             className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-8 py-4 rounded-xl shadow-md hover:shadow-lg transition-all text-base">
-            Get started — it's free
+            Start your 7-day free trial
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>

@@ -36,10 +36,11 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    // Initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Initial session — wait for the profile too, so subscription gating
+    // never runs against a profile that simply hasn't loaded yet
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session)
-      fetchProfile(session?.user?.id, session?.user?.user_metadata)
+      await fetchProfile(session?.user?.id, session?.user?.user_metadata)
       setLoading(false)
     })
 

@@ -2,10 +2,25 @@ import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
+import { getSubscriptionState, redirectToBillingPortal } from '../utils/subscription'
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useAuth()
   const fileInputRef = useRef(null)
+  const sub = getSubscriptionState(profile)
+  const [portalBusy,  setPortalBusy]  = useState(false)
+  const [portalError, setPortalError] = useState('')
+
+  async function openPortal() {
+    setPortalBusy(true)
+    setPortalError('')
+    try {
+      await redirectToBillingPortal()
+    } catch (err) {
+      setPortalError(err.message)
+      setPortalBusy(false)
+    }
+  }
 
   const [form, setForm] = useState({
     advisor_name: profile?.advisor_name ?? '',
@@ -253,6 +268,45 @@ export default function Profile() {
             <Link to="/dashboard" className="btn-secondary">Cancel</Link>
           </div>
         </form>
+
+        {/* Subscription */}
+        <div className="card mt-6">
+          <h2 className="text-base font-semibold text-gray-900 mb-1">Subscription</h2>
+          {sub.status === 'active' ? (
+            <>
+              <p className="text-sm text-gray-500 mb-4">
+                You're subscribed to <span className="font-medium text-gray-700">RC Genie Pro</span> — $9/month.
+                {profile?.current_period_end && (
+                  <> Renews {new Date(profile.current_period_end).toLocaleDateString()}.</>
+                )}
+              </p>
+              <button type="button" onClick={openPortal} disabled={portalBusy} className="btn-secondary text-sm">
+                {portalBusy ? 'Opening…' : 'Manage subscription'}
+              </button>
+              <p className="text-xs text-gray-400 mt-2">
+                Update your payment method, view invoices, or cancel — all handled securely by Stripe.
+              </p>
+            </>
+          ) : sub.inTrial ? (
+            <>
+              <p className="text-sm text-gray-500 mb-4">
+                You're on a free trial — {sub.trialDaysLeft} day{sub.trialDaysLeft === 1 ? '' : 's'} left.
+                Subscribe for $9/month to keep access after it ends.
+              </p>
+              <Link to="/subscribe" className="btn-primary text-sm inline-flex">Subscribe now</Link>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-gray-500 mb-4">
+                You don't have an active subscription.
+              </p>
+              <Link to="/subscribe" className="btn-primary text-sm inline-flex">Subscribe — $9/month</Link>
+            </>
+          )}
+          {portalError && (
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{portalError}</div>
+          )}
+        </div>
       </div>
     </div>
   )

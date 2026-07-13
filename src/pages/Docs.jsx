@@ -33,7 +33,9 @@ function GettingStarted() {
       <h2>Creating Your Account</h2>
       <ol>
         <li>
-          Go to the RC Genie homepage and click <strong>Get started free</strong>.
+          Go to the RC Genie homepage and click <strong>Start free trial</strong>. Every new
+          account includes a 7-day free trial — no credit card required. After the trial,
+          RC Genie is $9/month, and you can cancel anytime.
         </li>
         <li>
           Enter your name, email address, firm name, and a password, then click

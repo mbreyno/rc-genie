@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabase'
 import { formatCurrency } from '../utils/calculations'
+import { getSubscriptionState } from '../utils/subscription'
 
 export default function Dashboard() {
   const { user, profile, signOut } = useAuth()
+  const sub = getSubscriptionState(profile)
   const navigate = useNavigate()
   const [reports,  setReports]  = useState([])
   const [loading,  setLoading]  = useState(true)
@@ -100,6 +102,27 @@ export default function Dashboard() {
             New Report
           </Link>
         </div>
+
+        {/* Trial countdown */}
+        {sub.inTrial && (
+          <div className="mb-6 p-4 bg-brand-50 border border-brand-200 rounded-xl flex items-start gap-3">
+            <svg className="w-5 h-5 text-brand-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-brand-800">
+                {sub.trialDaysLeft} day{sub.trialDaysLeft === 1 ? '' : 's'} left in your free trial
+              </p>
+              <p className="text-sm text-brand-700 mt-0.5">
+                Subscribe for $9/month to keep generating reports — your card won't be charged until the trial ends.
+              </p>
+            </div>
+            <Link to="/subscribe" className="btn-primary text-sm py-1.5 px-3 shrink-0">
+              Subscribe
+            </Link>
+          </div>
+        )}
 
         {/* Profile setup nudge */}
         {profile && (!profile.firm_name || !profile.logo_url) && (
