@@ -73,7 +73,7 @@ export default function Landing() {
       {/* ── Nav ─────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+          <Link to="/" title="RC Genie home" className="flex items-center gap-2.5">
             <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center shadow-sm">
               <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -81,7 +81,7 @@ export default function Landing() {
               </svg>
             </div>
             <span className="font-bold text-gray-900 text-lg tracking-tight">RC Genie</span>
-          </div>
+          </Link>
           <div className="flex items-center gap-3">
             <a href="#pricing" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
               Pricing
@@ -349,7 +349,7 @@ export default function Landing() {
       {/* ── Footer ──────────────────────────────────────────────────────── */}
       <footer className="border-t border-gray-100 py-8 px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <Link to="/" title="RC Genie home" className="flex items-center gap-2">
             <div className="w-6 h-6 bg-brand-600 rounded flex items-center justify-center">
               <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -357,7 +357,7 @@ export default function Landing() {
               </svg>
             </div>
             <span className="font-semibold text-gray-700 text-sm">RC Genie</span>
-          </div>
+          </Link>
           <p className="text-xs text-gray-400">
             © {new Date().getFullYear()} RC Genie. Wage data sourced from the U.S. Bureau of Labor Statistics.
           </p>

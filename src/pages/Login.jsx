@@ -30,12 +30,13 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Logo / branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-brand-600 rounded-2xl mb-4 shadow-lg">
+          <Link to="/" title="RC Genie home"
+            className="inline-flex items-center justify-center w-14 h-14 bg-brand-600 rounded-2xl mb-4 shadow-lg">
             <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-          </div>
+          </Link>
           <h1 className="text-2xl font-bold text-gray-900">RC Genie</h1>
           <p className="text-gray-500 mt-1">Reasonable Compensation for S-Corp Owners</p>
         </div>
